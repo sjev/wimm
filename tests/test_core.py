@@ -22,17 +22,20 @@ def test_parser():
     
     assert res == ['Equity','bank','savings']
     
-def test_accounts():
+def test_create_accounts():
     
     # --- create with dict
-    d =  {'acc1':0.0,'acc2':100.0}
+    d =  {'acc1':50.0,'acc2':100.0}
     
     acc = core.Accounts(d)
     
-    assert acc.accounts['acc1'] == 0
-    assert acc.accounts['acc2'] == 100
+    assert acc['acc1'] == 50
+    assert acc['acc2'] == 100
+    assert acc.sum() == 150
     
+def test_load_accounts():    
+
     # --- cretate from file
     acc = core.Accounts.from_file('accounts.yaml')
-    assert acc.accounts['Assets'] == 0
-    assert acc.accounts['Assets.bank'] == 1000.0
+    assert acc['Assets'] == 0
+    assert acc['Assets.bank'] == 1000.0

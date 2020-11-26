@@ -40,23 +40,15 @@ def parse_account(s):
     
     return s.strip().split('.')
 
-class Accounts:
+class Accounts(dict):
     """ class for working with accounts """
-    
-    def __init__(self, accounts):
-        """
-        Parameters
-        ----------
-        accounts : dict
-            definition in in form of {'account_name':value}
-
-        Returns
-        -------
-        None.
-
-        """
-        self.accounts = accounts
+         
+    def sum(self):
         
+        total = 0
+        for k,v in self.items():
+            total += v        
+        return total
     
     @classmethod 
     def from_file(cls,yaml_file):
