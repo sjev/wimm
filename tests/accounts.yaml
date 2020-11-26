@@ -1,11 +1,6 @@
-- Alice/bank/savings
-- Alice/bank/checking
-- Alice/sock
-- Alice/debt
-
-- Bob
-- Charlie
-
-
-# general expenses. Use labels for categorizing
-- Expenses    
+# account definitions with opening balances
+- Assets
+- Assets.bank: 1000.0
+- Liabilities
+- Expenses
+- Income

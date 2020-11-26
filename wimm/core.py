@@ -33,11 +33,46 @@ A tranaction may be taxed (with a VAT for example)
 
 
 """
-
+import yaml
 
 def parse_account(s):
     """ parse entity and account string """
     
     return s.strip().split('.')
 
+class Accounts:
+    """ class for working with accounts """
+    
+    def __init__(self, accounts):
+        """
+        Parameters
+        ----------
+        accounts : dict
+            definition in in form of {'account_name':value}
 
+        Returns
+        -------
+        None.
+
+        """
+        self.accounts = accounts
+        
+    
+    @classmethod 
+    def from_file(cls,yaml_file):
+        """ create class from a yaml file """
+        
+        data = yaml.load(open(yaml_file), Loader=yaml.SafeLoader)
+        
+        accounts = {}
+        for d in data:
+            if isinstance(d,str):
+                accounts[d] = 0.0
+            elif isinstance(d,dict):
+                accounts = {**accounts,**d}
+            else:
+                raise TypeError
+            
+        return cls(accounts)
+                
+        
