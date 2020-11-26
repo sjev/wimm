@@ -1,17 +1,17 @@
 - utc: 2020-01-01
   from: Bob
-  to: Alice/bank/checking
+  to: Alice.bank.checking
   amount: 100
 
 - utc: 2020-01-01
-  from: Alice/bank/checking
+  from: Alice.bank.checking
   to: Expenses
   amount: 15.50
   description: paper
   labels: office_suppies
 
 - utc: 2020-01-01  
-  from: Alice/bank/checking
+  from: Alice.bank.checking
   to: Expenses
   amount: 34.5
   description: pens

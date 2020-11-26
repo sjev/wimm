@@ -50,6 +50,14 @@ class Accounts(dict):
             total += v        
         return total
     
+    def create(self,key):
+        """ add account """
+        self.__setitem__(key,0.0)
+    
+    def exists(self, key):
+        """ check if account exists """
+        return True if key in self.keys() else False
+    
     @classmethod 
     def from_file(cls,yaml_file):
         """ create class from a yaml file """
@@ -67,4 +75,45 @@ class Accounts(dict):
             
         return cls(accounts)
                 
+
+class Transactions(list):
+    """ transactons class, extension of a list """
+
+    def apply(self, accounts, create_accounts=False):
+        """
+        apply transactions to accounts 
+
+        Parameters
+        ----------
+        accounts : dict
+            accounts and their values
+        create_accounts : TYPE, optional
+            automatically creaate accounts if these don't exist.
+            raise exception otherwise
+
+        Returns
+        -------
+        None.
+
+        """
+        for t in self:
+            
+            for account in [t['from'],t['to']]:
+                if not accounts.exists(account):
+                    if create_accounts:
+                        accounts.create(account)
+                    else:
+                        raise ValueError(f'Account {account} does not exist')
+            
+            
+            accounts[t['from']] -= t['amount']
+            accounts[t['to']] += t['amount']
+
         
+    @classmethod 
+    def from_file(cls,yaml_file):
+        """ create class from a yaml file """
+        
+        data = yaml.load(open(yaml_file), Loader=yaml.SafeLoader)
+        return cls(data)
+    
