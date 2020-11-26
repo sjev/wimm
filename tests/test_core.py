@@ -17,7 +17,7 @@ from wimm import core
 
 def test_parser():
     
-    s = 'Alice/bank/savings'
-    res = core.parse_destination(s)
+    s = 'Equity.bank.savings'
+    res = core.parse_account(s)
     
-    assert res == ['Alice','bank','savings']
+    assert res == ['Equity','bank','savings']

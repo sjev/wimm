@@ -8,22 +8,21 @@ Core classes and functions
 Entities & accounts
 --------------------
 
-The system is built upon the concept of *entities*, *accounts* and 
+The system is built upon the concept of  *accounts* and 
 *transactions*. 
 
-An *entity* is wehere the money goes to (or comes from) and 
+An *account* is wehere the money goes to (or comes from) and 
 can be a person, company or a generic destination like for example 'expenses.'
 
-An *account* holds money within an entity. Subaccounts are used for grouping
+Subaccounts are used for grouping
 and better organisation.
 
-The `/` sign is used to denote an entity and its (sub)accounts
+The dot `.` sign is used to denote an entity and its (sub)accounts
 
 Example of an entity with a subaccount:
     
-`Alice/bank/savings`
+`Equity.bank.savings`
 
-**note**: forward slash is used as colon is a bit funky in yaml
 
 
 Transactions
@@ -36,9 +35,9 @@ A tranaction may be taxed (with a VAT for example)
 """
 
 
-def parse_destination(s):
+def parse_account(s):
     """ parse entity and account string """
     
-    return s.strip().split('/')
+    return s.strip().split('.')
 
 
