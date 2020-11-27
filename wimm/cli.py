@@ -6,18 +6,25 @@ main cli application
 @author: jev
 """
 
-import wimm
+import wimm # app version is defined in __init__.py
+import wimm.utils as utils
 
 import click
+import yaml
 
 @click.group()
 @click.version_option(version=wimm.__version__)
 def cli():
-    print('starting cli')
+    pass
 
 @click.command()
-def hello():
-    print('hello')
+def init():
+    """ initialize directories and necessary files """
+    
+    from wimm.structure import accounts
+    with open(r'accounts.yaml','w') as file:
+        yaml.dump(accounts, file)
+    
     
 @click.command()
 def bye():
@@ -29,7 +36,7 @@ def say_what(what):
     """ repeat after me..."""
     print('Say:',what)
 
-cli.add_command(hello)
+cli.add_command(init)
 cli.add_command(bye)
 cli.add_command(say_what)
 
