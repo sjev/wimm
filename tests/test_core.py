@@ -45,7 +45,7 @@ def test_create_accounts():
     assert acc['External'] == 100
     assert acc.sum() == 150
     
-def test_load_accounts():    
+def test_accounts_roundtrip():    
 
     accounts = core.Accounts(structure.accounts)
     
@@ -59,10 +59,14 @@ def test_load_accounts():
     for k in accounts.keys():
         assert acc[k] == accounts[k]
     
-def test_load_transactions():
+def test_transactions_roundtrip():
     
-    t = core.Transactions.from_file('transactions.yaml')
-    assert len(t) == 3
+    core.Transactions(structure.transactions).to_yaml('transactions.yaml')
+    
+    transactions = core.Transactions.from_file('transactions.yaml')
+    
+    for i,t in enumerate(structure.transactions):
+        transactions[i] = t
 
 def test_transactions():
     """ test applying transactions to accounts """

@@ -67,13 +67,8 @@ class Accounts(UserDict):
     @classmethod 
     def from_file(cls,yaml_file):
         """ create class from a yaml file """
-        
         data = yaml.load(open(yaml_file), Loader=yaml.SafeLoader)
-        
-                 
         return cls(data)
-                
-
 
 
 
@@ -109,6 +104,9 @@ class Transactions(UserList):
             
             accounts[t['from']] -= t['amount']
             accounts[t['to']] += t['amount']
+
+    def to_yaml(self, yaml_file):
+        utils.save_yaml(yaml_file, self.data ,ask_confirmation=False)
 
         
     @classmethod 
