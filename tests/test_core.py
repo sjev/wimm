@@ -30,8 +30,9 @@ def test_create_accounts():
     
     acc = core.Accounts(structure.accounts)
     
-    assert acc.exists('Assets') == True
-    assert acc.exists('Assets.bank') == True
+    for name in structure.account_names:
+        assert acc.exists(name) 
+        
     assert acc.exists('foo') == False
     
     acc.create('foo')
