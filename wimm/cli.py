@@ -20,6 +20,15 @@ import yaml
 def cli():
     pass
 
+@click.group()
+def show():
+    """ print reports """
+
+@click.group('import')
+def import_data():
+    """ import statements, documents etc. """
+    pass
+
 @click.command()
 def init():
     """ initialize directories and necessary files """
@@ -37,10 +46,7 @@ def init():
         except Exception as e:
             print('Could not create folder:',e)
     
-@click.group('import')
-def import_data():
-    """ import statements, documents etc. """
-    pass
+
     
 @click.command('statement')
 @click.argument('data_file')
@@ -58,19 +64,27 @@ def import_statement(data_file):
         f.write( f'\n# ---IMPORT--- at {utils.timestamp()} file: {data_file}\n')
         f.write(transactions.to_yaml())
         
+
+@click.command('balance')
+def show_balance():
+    """ print current balance """
+    transactions = core.Transactions.from_yaml('/home/jev/Development/wimm/scratch/transactions.yaml')
+    accounts = core.Accounts()
+    transactions.apply(accounts,create_accounts=True) # TODO: make option for creating accounts
     
+    print('----------Balance-----------')
+    for k,v in accounts.items():
+        print(f"{k:<25}{v:>20.2f}")
+
+
+# build groups
 import_data.add_command(import_statement)    
     
-    
-@click.command()
-@click.argument('what')
-def say_what(what):
-    """ repeat after me..."""
-    print('Say:',what)
+show.add_command(show_balance)
 
 cli.add_command(init)
 cli.add_command(import_data)
-cli.add_command(say_what)
+cli.add_command(show)
 
 if __name__ == "__main__":
     cli()
