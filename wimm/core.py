@@ -35,6 +35,7 @@ A tranaction may be taxed (with a VAT for example)
 """
 from collections import UserDict, UserList
 import yaml
+import wimm.utils as utils
 
 def parse_account(s):
     """ parse entity and account string """
@@ -59,22 +60,18 @@ class Accounts(UserDict):
         """ check if account exists """
         return True if key in self.keys() else False
     
+    def to_yaml(self, yaml_file):
+        utils.save_yaml(yaml_file, self.data ,ask_confirmation=False)
+        
+    
     @classmethod 
     def from_file(cls,yaml_file):
         """ create class from a yaml file """
         
         data = yaml.load(open(yaml_file), Loader=yaml.SafeLoader)
         
-        accounts = {}
-        for d in data:
-            if isinstance(d,str):
-                accounts[d] = 0.0
-            elif isinstance(d,dict):
-                accounts = {**accounts,**d}
-            else:
-                raise TypeError
-            
-        return cls(accounts)
+                 
+        return cls(data)
                 
 
 

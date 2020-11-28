@@ -47,10 +47,17 @@ def test_create_accounts():
     
 def test_load_accounts():    
 
+    accounts = core.Accounts(structure.accounts)
+    
+    accounts['Assets.bank'] = 100
+    assert accounts['Assets.bank'] == 100.0
+    accounts.to_yaml('accounts.yaml')
+
+
     # --- cretate from file
     acc = core.Accounts.from_file('accounts.yaml')
-    assert acc['Assets'] == 0
-    assert acc['Assets.bank'] == 1000.0
+    for k in accounts.keys():
+        assert acc[k] == accounts[k]
     
 def test_load_transactions():
     

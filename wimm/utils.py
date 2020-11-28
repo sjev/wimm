@@ -20,7 +20,7 @@ def save_yaml(yaml_file, data, ask_confirmation=True):
     """ write data to file, optionally ask for overwrite confirmation """
     
     
-    if os.path.exists(yaml_file):
+    if os.path.exists(yaml_file) and ask_confirmation:
         overwrite = click.confirm(f'Overwrite {yaml_file}?')
         if not overwrite:
             return

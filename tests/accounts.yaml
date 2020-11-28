@@ -1,6 +1,6 @@
-# account definitions with opening balances
-- Assets
-- Assets.bank: 1000.0
-- Liabilities
-- Expenses
-- Income
+Assets: 0.0
+Assets.bank: 100
+External: 0.0
+External.clients: 0.0
+External.suppliers: 0.0
+Liabilities: 0.0
