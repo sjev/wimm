@@ -8,6 +8,7 @@ main cli application
 
 import wimm # app version is defined in __init__.py
 import wimm.utils as utils
+import wimm.core as core
 
 import os
 import click
@@ -36,9 +37,30 @@ def init():
         except Exception as e:
             print('Could not create folder:',e)
     
-@click.command()
-def bye():
-    print('bye')
+@click.group('import')
+def import_data():
+    """ import statements, documents etc. """
+    pass
+    
+@click.command('statement')
+@click.argument('data_file')
+def import_statement(data_file):
+    """import bank statement to the end of `transactions.yaml`"""
+    print(f'importing {data_file}') 
+    
+    if not os.path.exists(data_file):
+        print('ERROR: file not found')
+        return
+    
+    transactions = core.Transactions.from_bank_statement(data_file)
+    
+    with open('transactions.yaml','a') as f:
+        f.write( f'\n# ---IMPORT--- at {utils.timestamp()} file: {data_file}\n')
+        f.write(transactions.to_yaml())
+        
+    
+import_data.add_command(import_statement)    
+    
     
 @click.command()
 @click.argument('what')
@@ -47,7 +69,7 @@ def say_what(what):
     print('Say:',what)
 
 cli.add_command(init)
-cli.add_command(bye)
+cli.add_command(import_data)
 cli.add_command(say_what)
 
 if __name__ == "__main__":

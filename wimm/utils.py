@@ -8,6 +8,7 @@ from yaml.loader import SafeLoader
 import click
 import yaml
 import os
+import pandas as pd
 
 def timestamp():
     t=dt.datetime.now()
@@ -35,5 +36,41 @@ class SafeLineLoader(SafeLoader):
         # Add 1 so line numbering starts at 1
         mapping['__line__'] = node.start_mark.line + 1
         return mapping
+   
+def df_to_yaml(df):
+    """ conert DataFrame to yaml string """
     
+    d = df.to_dict(orient='records')
+    return yaml.dump(d)
 
+def read_csv_ASN(csv_file):
+    """
+    load ASN bank csv file.
+
+    Parameters
+    ----------
+    csv_file : string
+        statement in csv format
+
+    Returns
+    -------
+    DataFrame
+
+    """
+    header = ['Boekingsdatum','Opdrachtgeversrekening','Tegenrekeningnummer',
+              'Naam tegenrekening','Adres','Postcode','Plaats','Valutasoort rekening',
+              'Saldo voor mutatie','Valutasoort mutatie','Bedrag','Jounaaldatum','Valutadatum',
+              'Interne transactiecode', 'Globale transactiecode', 'Volgnummer','Betalingskenmerk',
+              'Omschrijving','Afschriftnummer']
+    
+    mapping = {'Boekingsdatum':'timestamp', 'Naam tegenrekening':'name','Bedrag':'amount','Omschrijving':'description'}
+    
+    df = pd.read_csv(csv_file,names=header)
+    df.rename(mapping,axis=1,inplace=True)
+
+    relevant_cols = [v for k,v in mapping.items()]
+    
+    df = df[relevant_cols]
+   
+    
+    return df

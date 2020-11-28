@@ -105,10 +105,52 @@ class Transactions(UserList):
             accounts[t['from']] -= t['amount']
             accounts[t['to']] += t['amount']
 
-    def to_yaml(self, yaml_file):
-        utils.save_yaml(yaml_file, self.data ,ask_confirmation=False)
+    def to_yaml(self, yaml_file=None):
+        """ write to file or return string """
+        
+        if yaml_file:
+            utils.save_yaml(yaml_file, self.data ,ask_confirmation=False)
+     
+        return yaml.dump(self.data)
 
         
+    @classmethod 
+    def from_bank_statement(cls, statement_file, statement_type = 'ASN'):
+        """
+        parse bank statement
+
+        Parameters
+        ----------
+        statement_file : string
+            csv or other file to parse
+        statement_type : string, optional
+            Type of statement. The default is 'ASN'.
+
+        Returns
+        -------
+        Statements
+
+        """
+        
+        if statement_type == 'ASN':
+            df = utils.read_csv_ASN(statement_file)
+            data = df.to_dict(orient='records')
+            
+            # flip directions for withdrawals
+            for d in data:
+                if d['amount'] < 0:
+                    d['amount'] = -d['amount']
+                    d['from'] = 'Assets.Bank.ASN'
+                    d['to'] = d.pop('name')
+                else:
+                    d['to'] = 'Assets.Bank.ASN'
+                    d['from'] = d.pop('name')
+            
+            
+            return cls(data)
+        else:
+            raise ValueError(f'Unknown statement type: {statement_type}')
+
     @classmethod 
     def from_file(cls,yaml_file):
         """ create class from a yaml file """
