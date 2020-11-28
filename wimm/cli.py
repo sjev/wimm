@@ -9,8 +9,10 @@ main cli application
 import wimm # app version is defined in __init__.py
 import wimm.utils as utils
 
+import os
 import click
 import yaml
+
 
 @click.group()
 @click.version_option(version=wimm.__version__)
@@ -21,10 +23,18 @@ def cli():
 def init():
     """ initialize directories and necessary files """
     
-    from wimm.structure import accounts
-    with open(r'accounts.yaml','w') as file:
-        yaml.dump(accounts, file)
+    # create files
+    import wimm.structure as structure
+    utils.save_yaml(r'accounts.yaml',structure.accounts)
+    utils.save_yaml(r'settings.yaml', structure.settings)
+    utils.save_yaml(r'transactions.yaml', structure.transactions)
     
+    # create folders
+    for folder in structure.folders:
+        try:
+            os.mkdir(folder)
+        except Exception as e:
+            print('Could not create folder:',e)
     
 @click.command()
 def bye():

@@ -33,6 +33,7 @@ A tranaction may be taxed (with a VAT for example)
 
 
 """
+from collections import UserDict, UserList
 import yaml
 
 def parse_account(s):
@@ -40,7 +41,7 @@ def parse_account(s):
     
     return s.strip().split('.')
 
-class Accounts(dict):
+class Accounts(UserDict):
     """ class for working with accounts """
          
     def sum(self):
@@ -76,7 +77,10 @@ class Accounts(dict):
         return cls(accounts)
                 
 
-class Transactions(list):
+
+
+
+class Transactions(UserList):
     """ transactons class, extension of a list """
 
     def apply(self, accounts, create_accounts=False):
