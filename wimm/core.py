@@ -42,6 +42,17 @@ def parse_account(s):
     
     return s.strip().split('.')
 
+
+def get_account(item):
+    """ return account from an item. Can be a string or a dict """
+    try:
+        account = item['account'] # try value from dict
+    except TypeError:
+        account = item
+        
+    return account
+
+
 class Accounts(UserDict):
     """ class for working with accounts """
          
@@ -92,18 +103,18 @@ class Transactions(UserList):
         None.
 
         """
+        
         for t in self:
-            
-            for account in [t['from'],t['to']]:
+            for data in [t['from'],t['to']]:
+                account = get_account(data)
                 if not accounts.exists(account):
                     if create_accounts:
                         accounts.create(account)
                     else:
                         raise ValueError(f'Account {account} does not exist')
             
-            
-            accounts[t['from']] -= t['amount']
-            accounts[t['to']] += t['amount']
+            accounts[get_account(t['from'])] -= t['amount']
+            accounts[get_account(t['to'])] += t['amount']
 
     def to_yaml(self, yaml_file=None):
         """ write to file or return string """

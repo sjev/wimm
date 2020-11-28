@@ -28,7 +28,7 @@ account_names = ['Assets',
 accounts = dict(zip(account_names, len(account_names)*[0.0]))
 
 transactions = [ {'timestamp' : '2020-01-01',
-               'from' : 'Ext.Bob',
+               'from' : {'account':'Ext.Bob','name':'Bob','iban':12345},
                'to' : 'Assets.bank',
                'amount' : 1000.0,
                'description' : 'Customer paid invoice'},
