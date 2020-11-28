@@ -1,6 +1,6 @@
 # specific files
 transactions.yaml
-accounts.yaml:
+accounts.yaml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
