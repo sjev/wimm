@@ -63,7 +63,11 @@ def read_csv_ASN(csv_file):
               'Interne transactiecode', 'Globale transactiecode', 'Volgnummer','Betalingskenmerk',
               'Omschrijving','Afschriftnummer']
     
-    mapping = {'Boekingsdatum':'timestamp', 'Naam tegenrekening':'name','Bedrag':'amount','Omschrijving':'description'}
+    mapping = {'Boekingsdatum':'date', 
+               'Naam tegenrekening':'name',
+               'Bedrag':'amount',
+               'Omschrijving':'description',
+               'Tegenrekeningnummer':'iban_other'}
     
     df = pd.read_csv(csv_file,names=header)
     df.rename(mapping,axis=1,inplace=True)

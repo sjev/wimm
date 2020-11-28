@@ -76,7 +76,7 @@ class Accounts(UserDict):
         
     
     @classmethod 
-    def from_file(cls,yaml_file):
+    def from_yaml(cls,yaml_file):
         """ create class from a yaml file """
         data = yaml.load(open(yaml_file), Loader=yaml.SafeLoader)
         return cls(data)
@@ -145,25 +145,35 @@ class Transactions(UserList):
         
         if statement_type == 'ASN':
             df = utils.read_csv_ASN(statement_file)
-            data = df.to_dict(orient='records')
+            records = df.to_dict(orient='records')
             
-            # flip directions for withdrawals
-            for d in data:
-                if d['amount'] < 0:
-                    d['amount'] = -d['amount']
+            data = []
+            
+            for r in records:
+                
+                #init data element
+                d = {}
+                
+                if r['amount'] < 0: # withdrawal
+                    d['amount'] = -r['amount']
                     d['from'] = 'Assets.Bank.ASN'
-                    d['to'] = d.pop('name')
+                    d['to'] = {'account': 'Ext.Unknown', 'name':r['name'], 'iban':r['iban_other']}
                 else:
+                    d['amount'] = r['amount']
+                    d['from'] = {'account': 'Ext.Unknown', 'name':r['name'], 'iban':r['iban_other']}
                     d['to'] = 'Assets.Bank.ASN'
-                    d['from'] = d.pop('name')
-            
+                
+                d['date'] = r['date']
+                d['description'] = r['description']
+                    
+                data.append(d)
             
             return cls(data)
         else:
             raise ValueError(f'Unknown statement type: {statement_type}')
 
     @classmethod 
-    def from_file(cls,yaml_file):
+    def from_yaml(cls,yaml_file):
         """ create class from a yaml file """
         
         data = yaml.load(open(yaml_file), Loader=yaml.SafeLoader)

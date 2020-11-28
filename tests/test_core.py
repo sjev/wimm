@@ -56,7 +56,7 @@ def test_accounts_roundtrip():
 
 
     # --- cretate from file
-    acc = core.Accounts.from_file('accounts.yaml')
+    acc = core.Accounts.from_yaml('accounts.yaml')
     for k in accounts.keys():
         assert acc[k] == accounts[k]
     
@@ -64,7 +64,7 @@ def test_transactions_roundtrip():
     
     core.Transactions(structure.transactions).to_yaml('transactions.yaml')
     
-    transactions = core.Transactions.from_file('transactions.yaml')
+    transactions = core.Transactions.from_yaml('transactions.yaml')
     
     for i,t in enumerate(structure.transactions):
         transactions[i] = t
@@ -73,7 +73,7 @@ def test_transactions():
     """ test applying transactions to accounts """
     
     accounts = core.Accounts()
-    transactions = core.Transactions.from_file('transactions.yaml')
+    transactions = core.Transactions.from_yaml('transactions.yaml')
     transactions.apply(accounts, create_accounts=True)
     
     assert accounts.sum() == 0
