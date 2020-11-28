@@ -21,8 +21,9 @@ folders = [settings['invoices']['sent']['folder'],
 _account_names = ['Assets', 
                   'Assets.bank',
                   'Liabilities',
-                  'Expenses',
-                  'Income']
+                  'External.clients',
+                  'External.suppliers',
+                  'External']
 
 accounts = dict(zip(_account_names, len(_account_names)*[0.0]))
 

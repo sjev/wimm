@@ -14,6 +14,8 @@ cwd = Path(os.getcwd())
 sys.path.insert(0, cwd.parent.as_posix())  
 
 from wimm import core
+import wimm.structure as structure
+
 
 def test_parser():
     
@@ -25,18 +27,22 @@ def test_parser():
 def test_create_accounts():
     
     # --- create with dict
-    d =  {'acc1':50.0,'acc2':100.0}
-    acc = core.Accounts(d)
     
-    assert acc.exists('acc1') == True
+    acc = core.Accounts(structure.accounts)
+    
+    assert acc.exists('Assets') == True
+    assert acc.exists('Assets.bank') == True
     assert acc.exists('foo') == False
     
     acc.create('foo')
     assert acc.exists('foo') == True
     
     
-    assert acc['acc1'] == 50
-    assert acc['acc2'] == 100
+    acc['Assets'] = 50
+    acc['External'] = 100
+    
+    assert acc['Assets'] == 50
+    assert acc['External'] == 100
     assert acc.sum() == 150
     
 def test_load_accounts():    
