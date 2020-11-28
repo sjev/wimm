@@ -75,7 +75,8 @@ def show_balance():
     print('----------Balance-----------')
     for k,v in accounts.items():
         print(f"{k:<25}{v:>20.2f}")
-
+    print('----------------------------')
+    print(f'SUM: {accounts.sum():.2f}')
 
 # build groups
 import_data.add_command(import_statement)    
