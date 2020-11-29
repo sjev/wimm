@@ -78,10 +78,19 @@ def show_balance():
     print('----------------------------')
     print(f'SUM: {accounts.sum():.2f}')
 
+
+@click.command('transactions')
+def show_transactions():
+    """ show transactions as yaml data """
+    
+    transactions = core.Transactions.from_yaml('transactions.yaml')    
+    print(transactions.to_yaml())
+
 # build groups
 import_data.add_command(import_statement)    
     
 show.add_command(show_balance)
+show.add_command(show_transactions)
 
 cli.add_command(init)
 cli.add_command(import_data)
