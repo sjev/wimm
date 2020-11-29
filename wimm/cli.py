@@ -52,8 +52,10 @@ def init():
 
     
 @click.command('statement')
+@click.option('--bank',default='ASN',help='type of bank statement')
+@click.argument('account_name')
 @click.argument('data_file')
-def import_statement(data_file):
+def import_statement(bank, account_name,data_file):
     """import bank statement to the end of `transactions.yaml`"""
     print(f'importing {data_file}') 
     
@@ -61,7 +63,8 @@ def import_statement(data_file):
         print('ERROR: file not found')
         return
     
-    transactions = core.Transactions.from_bank_statement(data_file)
+    account = entity.accounts[account_name]
+    transactions = account.parse_bank_statement(data_file)
     
     with open('transactions.yaml','a') as f:
         f.write( f'\n# ---IMPORT--- at {utils.timestamp()} file: {data_file}\n')
@@ -84,12 +87,19 @@ def show_transactions():
     """ show transactions as yaml data """
     
     print(entity.transactions.to_yaml())
+    
+@click.command('accounts')
+def show_accounts():
+    """ show accounts """
+    for name in entity.accounts.keys():
+        print(name)
 
 # build groups
 import_data.add_command(import_statement)    
     
 show.add_command(show_balance)
 show.add_command(show_transactions)
+show.add_command(show_accounts)
 
 cli.add_command(init)
 cli.add_command(import_data)
