@@ -24,6 +24,7 @@ def test_parser():
     
     assert res == ['Equity','bank','savings']
     
+    
 def test_create_accounts():
     
     # --- create with dict

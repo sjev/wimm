@@ -36,6 +36,7 @@ A tranaction may be taxed (with a VAT for example)
 from collections import UserDict, UserList
 import yaml
 import wimm.utils as utils
+import pandas as pd
 
 def parse_account(s):
     """ parse entity and account string """
@@ -61,6 +62,17 @@ class Entity:
                  transactions_yaml = 'transactions.yaml'):
         self.accounts = Accounts.from_yaml(accounts_yaml)
         self.transactions = Transactions.from_yaml(transactions_yaml)
+        self.transactions.apply(self.accounts)
+        
+    def balance(self):
+        """ calculate balance. Returns pd.Series """
+        
+        names = []
+        values = []
+        for k, acc in self.accounts.items():
+            names.append(k)
+            values.append(acc.value)
+        return pd.Series(data=values,index=names)
 
     def __repr__(self):
         return f"Entity Accounts:{len(self.accounts)} Transactions:{len(self.transactions)}"
@@ -69,12 +81,13 @@ class Entity:
     
 
 class Account:
-    """ account is an entity that holds money """
+    """ account is what holds money """
     
     def __init__(self, name, start_value = 0.0):
         self.name = name
         self.value = start_value
         
+       
     def add(self, amount):
         self.value += amount
     
@@ -173,7 +186,7 @@ class Accounts(UserDict):
 class Transactions(UserList):
     """ transactons class, extension of a list """
 
-    def apply(self, accounts, create_accounts=False):
+    def apply(self, accounts, create_accounts=True):
         """
         apply transactions to accounts 
 

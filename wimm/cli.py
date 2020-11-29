@@ -25,7 +25,7 @@ def cli():
 
 @click.group()
 def show():
-    """ print reports """
+    """ print reports. Provide an command what to show """
 
 @click.group('import')
 def import_data():
@@ -71,23 +71,19 @@ def import_statement(data_file):
 @click.command('balance')
 def show_balance():
     """ print current balance """
-    transactions = core.Transactions.from_yaml('/home/jev/Development/wimm/scratch/transactions.yaml')
-    accounts = core.Accounts()
-    transactions.apply(accounts,create_accounts=True) # TODO: make option for creating accounts
+   
     
     print('----------Balance-----------')
-    for k,v in accounts.items():
-        print(f"{k:<25}{v.value:>20.2f}")
+    print(entity.balance())
     print('----------------------------')
-    print(f'SUM: {accounts.sum():.2f}')
+    print(f'SUM: {entity.balance().sum():.2f}')
 
 
 @click.command('transactions')
 def show_transactions():
     """ show transactions as yaml data """
     
-    transactions = core.Transactions.from_yaml('transactions.yaml')    
-    print(transactions.to_yaml())
+    print(entity.transactions.to_yaml())
 
 # build groups
 import_data.add_command(import_statement)    
