@@ -9,6 +9,7 @@ import click
 import yaml
 import os
 import pandas as pd
+from pathlib import Path
 
 def timestamp():
     t=dt.datetime.now()
@@ -28,6 +29,19 @@ def save_yaml(yaml_file, data, ask_confirmation=True):
     
     with open(yaml_file,'w') as f:
         yaml.dump(data, f)
+
+def get_data_mappings(yaml_file = 'data_mappings.yaml'):
+    """ load data conversion definintions """
+    
+    p = Path(yaml_file)
+    if not p.is_absolute():
+        p = Path(__file__).absolute().parent / p
+        
+    data = yaml.load(p.open('r'),Loader = SafeLoader)
+    return data
+    
+    
+    
 
 
 class SafeLineLoader(SafeLoader):
@@ -57,17 +71,12 @@ def read_csv_ASN(csv_file):
     DataFrame
 
     """
-    header = ['Boekingsdatum','Opdrachtgeversrekening','Tegenrekeningnummer',
-              'Naam tegenrekening','Adres','Postcode','Plaats','Valutasoort rekening',
-              'Saldo voor mutatie','Valutasoort mutatie','Bedrag','Jounaaldatum','Valutadatum',
-              'Interne transactiecode', 'Globale transactiecode', 'Volgnummer','Betalingskenmerk',
-              'Omschrijving','Afschriftnummer']
+      
+    mappings = get_data_mappings()
     
-    mapping = {'Boekingsdatum':'date', 
-               'Naam tegenrekening':'name',
-               'Bedrag':'amount',
-               'Omschrijving':'description',
-               'Tegenrekeningnummer':'iban_other'}
+    header = mappings['ASN']['header']
+    mapping = mappings['ASN']['mapping']
+    
     
     df = pd.read_csv(csv_file,names=header)
     df.rename(mapping,axis=1,inplace=True)

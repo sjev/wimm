@@ -1,0 +1,27 @@
+ASN:
+  header:
+  - Boekingsdatum
+  - Opdrachtgeversrekening
+  - Tegenrekeningnummer
+  - Naam tegenrekening
+  - Adres
+  - Postcode
+  - Plaats
+  - Valutasoort rekening
+  - Saldo voor mutatie
+  - Valutasoort mutatie
+  - Bedrag
+  - Jounaaldatum
+  - Valutadatum
+  - Interne transactiecode
+  - Globale transactiecode
+  - Volgnummer
+  - Betalingskenmerk
+  - Omschrijving
+  - Afschriftnummer
+  mapping:
+    Bedrag: amount
+    Boekingsdatum: date
+    Naam tegenrekening: name
+    Omschrijving: description
+    Tegenrekeningnummer: iban_other
