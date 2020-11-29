@@ -28,7 +28,7 @@ def test_create_accounts():
     
     # --- create with dict
     
-    acc = core.Accounts(structure.accounts)
+    acc = core.Accounts.from_dict(structure.accounts)
     
     for name in structure.account_names:
         assert acc.exists(name) 
@@ -38,27 +38,24 @@ def test_create_accounts():
     acc.create('foo')
     assert acc.exists('foo') == True
     
+    acc['Assets'].value = 150.0
     
-    acc['Assets'] = 50
-    acc['External'] = 100
-    
-    assert acc['Assets'] == 50
-    assert acc['External'] == 100
     assert acc.sum() == 150
-    
+  
 def test_accounts_roundtrip():    
 
-    accounts = core.Accounts(structure.accounts)
+    accounts = core.Accounts.from_dict(structure.accounts)
     
-    accounts['Assets.bank'] = 100
-    assert accounts['Assets.bank'] == 100.0
+    
+    accounts['Assets.Bank'].value = 100
+    assert accounts['Assets.Bank'].value == 100.0
     accounts.to_yaml('accounts.yaml')
 
 
     # --- cretate from file
     acc = core.Accounts.from_yaml('accounts.yaml')
     for k in accounts.keys():
-        assert acc[k] == accounts[k]
+        assert acc[k].value == accounts[k].value
     
 def test_transactions_roundtrip():
     

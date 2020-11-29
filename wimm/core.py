@@ -52,34 +52,59 @@ def get_account(item):
         
     return account
 
+class Account:
+    """ account is an entity that holds money """
+    
+    def __init__(self, name, start_value = 0.0):
+        self.name = name
+        self.value = start_value
+        
+    def add(self, amount):
+        self.value += amount
+    
+    def subtract(self, amount):
+        self.value -= amount
 
 class Accounts(UserDict):
-    """ class for working with accounts """
+    """ dictionary holding multiple accounts """
          
     def sum(self):
         
         total = 0
         for k,v in self.items():
-            total += v        
+            total += v.value        
         return total
     
-    def create(self,key):
+    def create(self,name):
         """ add account """
-        self.__setitem__(key,0.0)
+        self.__setitem__(name,Account(name))
     
     def exists(self, key):
         """ check if account exists """
         return True if key in self.keys() else False
     
     def to_yaml(self, yaml_file):
-        utils.save_yaml(yaml_file, self.data ,ask_confirmation=False)
         
+        data_dict = {}
+        for name, account in self.items():
+            data_dict[name] = account.value
+        
+        utils.save_yaml(yaml_file, data_dict ,ask_confirmation=False)
+      
+    @classmethod
+    def from_dict(cls, data_dict):
+        
+        data = {}
+        for name,val in data_dict.items():
+            data[name] = Account(name,val)
+        
+        return cls(data)    
     
     @classmethod 
     def from_yaml(cls,yaml_file):
         """ create class from a yaml file """
-        data = yaml.load(open(yaml_file), Loader=yaml.SafeLoader)
-        return cls(data)
+               
+        return cls.from_dict(yaml.load(open(yaml_file), Loader=yaml.SafeLoader))
 
 
 
@@ -113,8 +138,8 @@ class Transactions(UserList):
                     else:
                         raise ValueError(f'Account {account} does not exist')
             
-            accounts[get_account(t['from'])] -= t['amount']
-            accounts[get_account(t['to'])] += t['amount']
+            accounts[get_account(t['from'])].subtract(t['amount'])
+            accounts[get_account(t['to'])].add(t['amount'])
 
     def to_yaml(self, yaml_file=None):
         """ write to file or return string """
