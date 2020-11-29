@@ -52,6 +52,22 @@ def get_account(item):
         
     return account
 
+
+class Entity:
+    """ class holding accounts and transactions for a company or a person """
+    
+    def __init__(self, 
+                 accounts_yaml = 'accounts.yaml',
+                 transactions_yaml = 'transactions.yaml'):
+        self.accounts = Accounts.from_yaml(accounts_yaml)
+        self.transactions = Transactions.from_yaml(transactions_yaml)
+
+    def __repr__(self):
+        return f"Entity Accounts:{len(self.accounts)} Transactions:{len(self.transactions)}"
+        
+    
+    
+
 class Account:
     """ account is an entity that holds money """
     
@@ -64,6 +80,52 @@ class Account:
     
     def subtract(self, amount):
         self.value -= amount
+        
+    def __repr__(self):
+        return f"{self.name}:{self.value:.2f}"
+        
+    def parse_bank_statement(self, statement_file, bank = 'ASN'):
+        """
+        parse bank statement
+
+        Parameters
+        ----------
+        statement_file : string
+            csv or other file to parse
+        bank : string, optional
+            Type of statement. The default is 'ASN'.
+
+        Returns
+        -------
+        Transactions 
+
+        """
+        
+        df = utils.read_bank_statement(statement_file, bank)
+        records = df.to_dict(orient='records')
+        
+        data = []
+        
+        for r in records:
+            
+            #init data element
+            d = {}
+            
+            if r['amount'] < 0: # withdrawal
+                d['amount'] = -r['amount']
+                d['from'] = self.name
+                d['to'] = {'account': 'Ext.Unknown', 'name':r['name'], 'iban':r['iban_other']}
+            else:
+                d['amount'] = r['amount']
+                d['from'] = {'account': 'Ext.Unknown', 'name':r['name'], 'iban':r['iban_other']}
+                d['to'] = self.name
+            
+            d['date'] = r['date']
+            d['description'] = r['description']
+                
+            data.append(d)
+        
+        return Transactions(data)
 
 class Accounts(UserDict):
     """ dictionary holding multiple accounts """
@@ -150,52 +212,6 @@ class Transactions(UserList):
         return yaml.dump(self.data)
 
         
-    @classmethod 
-    def from_bank_statement(cls, statement_file, statement_type = 'ASN'):
-        """
-        parse bank statement
-
-        Parameters
-        ----------
-        statement_file : string
-            csv or other file to parse
-        statement_type : string, optional
-            Type of statement. The default is 'ASN'.
-
-        Returns
-        -------
-        Statements
-
-        """
-        
-        if statement_type == 'ASN':
-            df = utils.read_csv_ASN(statement_file)
-            records = df.to_dict(orient='records')
-            
-            data = []
-            
-            for r in records:
-                
-                #init data element
-                d = {}
-                
-                if r['amount'] < 0: # withdrawal
-                    d['amount'] = -r['amount']
-                    d['from'] = 'Assets.Bank.ASN'
-                    d['to'] = {'account': 'Ext.Unknown', 'name':r['name'], 'iban':r['iban_other']}
-                else:
-                    d['amount'] = r['amount']
-                    d['from'] = {'account': 'Ext.Unknown', 'name':r['name'], 'iban':r['iban_other']}
-                    d['to'] = 'Assets.Bank.ASN'
-                
-                d['date'] = r['date']
-                d['description'] = r['description']
-                    
-                data.append(d)
-            
-            return cls(data)
-        else:
-            raise ValueError(f'Unknown statement type: {statement_type}')
 
     @classmethod 
     def from_yaml(cls,yaml_file):

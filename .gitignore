@@ -2,6 +2,9 @@
 transactions.yaml
 accounts.yaml
 
+# Vim lock files
+.~lock.*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

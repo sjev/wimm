@@ -57,9 +57,10 @@ def df_to_yaml(df):
     d = df.to_dict(orient='records')
     return yaml.dump(d)
 
-def read_csv_ASN(csv_file):
+def read_bank_statement(csv_file, bank='ASN'):
     """
-    load ASN bank csv file.
+    load bank statement csv file.
+    The transactions returned are relative to the bank account.
 
     Parameters
     ----------
@@ -74,8 +75,11 @@ def read_csv_ASN(csv_file):
       
     mappings = get_data_mappings()
     
-    header = mappings['ASN']['header']
-    mapping = mappings['ASN']['mapping']
+    if bank not in mappings.keys():
+        raise ValueError(f'No data mapping present for bank: {bank}')
+    
+    header = mappings[bank]['header']
+    mapping = mappings[bank]['mapping']
     
     
     df = pd.read_csv(csv_file,names=header)

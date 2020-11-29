@@ -15,6 +15,9 @@ import click
 import yaml
 
 
+entity = core.Entity()
+
+
 @click.group()
 @click.version_option(version=wimm.__version__)
 def cli():
@@ -74,7 +77,7 @@ def show_balance():
     
     print('----------Balance-----------')
     for k,v in accounts.items():
-        print(f"{k:<25}{v:>20.2f}")
+        print(f"{k:<25}{v.value:>20.2f}")
     print('----------------------------')
     print(f'SUM: {accounts.sum():.2f}')
 
