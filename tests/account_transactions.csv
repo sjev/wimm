@@ -1,0 +1,7 @@
+date,amount,name_other,account_other,iban_other,description
+2020-01-01,1.5,A,Ext.foo,12345,description1
+2020-01-02,-2.5,B,Ext.foo,12346,description2
+2020-01-03,3.5,C,Ext.foo,12347,description3
+2020-01-04,-4.5,D,Ext.foo,12348,description4
+2020-01-05,5.5,Foo,Ext.foo,12349,description5
+2020-01-06,-6.5,Bar,Ext.foo,12350,description6
