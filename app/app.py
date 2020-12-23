@@ -7,7 +7,8 @@ Created on Wed Dec 23 13:26:41 2020
 """
 
 from flask_table import Table, Col, LinkCol
-from flask import Flask, Markup, request, url_for
+from flask import Flask, Markup, request, url_for, render_template
+import json
 
 import wimm.utils as utils
 import wimm.core as core
@@ -20,6 +21,7 @@ A example for creating a Table that is sortable by its header
 app = Flask(__name__)
 
 invoices = wimm.structure.invoices
+#invoices = wimm.core.Invoices.from_yaml('invoices.yaml')
 
 class SortableTable(Table):
     #classes = ['striped']
@@ -45,31 +47,16 @@ def index():
     table = SortableTable(invoices.get_sorted_by(sort, reverse),
                           sort_by=sort,
                           sort_reverse=reverse)
-    page = f""" <!DOCTYPE html>
-                <html>
-                <head>
-                <link rel="stylesheet" href="https://cdn.rawgit.com/Chalarangelo/mini.css/v3.0.1/dist/mini-default.min.css">
-                </head>
-                <body>
-                
-                <h1>Invoices</h1>
-                {table.__html__()}
-                
-                </body>
-                </html>
-            """
     
-    return page
+    
+    return render_template('invoices_received.html', title="WIMM", table = table)
 
 
 @app.route('/item/<id>')
 def show_item(id):
     inv = invoices.get_by_id(id)
-    return str(inv.to_dict())
+    return json.dumps(inv.to_dict(),indent=4)
 
-
-
-invoices = wimm.structure.invoices
 
 
 if __name__ == '__main__':
