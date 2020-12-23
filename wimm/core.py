@@ -249,8 +249,8 @@ class Invoice:
     number : int
     date : str
     amount : float
-    sender : str
-    inbound : bool = True # sent / recieved
+    prefix : str = 'INV' #  INR / INS
+    sender : str = None
     due_date : str = None
     amount_payed : float = 25.0
     document : str = None
@@ -258,15 +258,18 @@ class Invoice:
     def rest_amount(self):
         return self.amount - self.amount_payed
     
-    def prefix(self):
+    @property
+    def id(self):
         "string prefix XXX_nr"
         
-        symbols = {True:'R',False:'S'}
-        return f"IN{symbols[self.inbound]}_{self.number:03d}"
+        return f"{self.prefix}_{self.number:03d}"
         
     def __repr__(self):
-        return "Invoice " + self.prefix()
-    
+        return "Invoice " + self.name()
+
+    def to_dict(self):
+        return asdict(self)
+
 class Invoices(ListPlus):
     
       def __init__(self, lst):
@@ -280,5 +283,16 @@ class Invoices(ListPlus):
 
         super().__init__(objects)
     
+      def get_by_id(self, id):
+        """ get invoice from id """
+        for inv in self.data:
+            if inv.id == id:
+                return inv
+        
+        raise KeyError('id not found')         
    
-    
+      def get_sorted_by(self, key, reverse = False):
+          
+          return sorted(self,
+                        key = lambda x: getattr(x, key),
+                        reverse = reverse)

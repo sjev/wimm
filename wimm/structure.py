@@ -60,7 +60,7 @@ def _make_test_invoices():
     #due_dates = ['2020-01-30','2020-02-15','2020-03-20','2021-01-05']
     amounts = [70,50,25,1000]
     senders = ['Bob','Bob','Alice','Alice']
-    objects = [Invoice(*vals) for vals in zip(range(len(dates)),dates,amounts,senders)]
+    objects = [Invoice(*vals) for vals in zip(range(len(dates)),dates,amounts,len(dates)*['INR'],senders)]
     return Invoices(objects)
     
 invoices = _make_test_invoices()

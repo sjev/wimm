@@ -93,3 +93,13 @@ def test_invoices_roundtrip():
     invoices1 = core.Invoices.from_yaml(fname)
     
     assert invoices == invoices1
+    
+def test_invoices_functions():
+    
+    invoices = structure.invoices
+    
+    inv = invoices.get_by_id('INR_002')
+    assert inv.number == 2
+    
+    inv = invoices.get_sorted_by('id', reverse=True)[0]
+    assert inv.number == 3
