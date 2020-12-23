@@ -1,0 +1,9 @@
+<head>
+    {{dropzone.load_css() }}
+</head>
+<body>
+<h1>Test page</h1>
+    {{ dropzone.load_js() }}
+    {{ dropzone.create(action='/') }}    
+    {{ dropzone.config() }}
+</body>

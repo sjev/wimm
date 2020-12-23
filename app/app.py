@@ -8,7 +8,9 @@ Created on Wed Dec 23 13:26:41 2020
 
 from flask_table import Table, Col, LinkCol
 from flask import Flask, Markup, request, url_for, render_template
+from flask_dropzone import Dropzone
 import json
+
 
 import wimm.utils as utils
 import wimm.core as core
@@ -19,6 +21,8 @@ A example for creating a Table that is sortable by its header
 """
 
 app = Flask(__name__)
+dropzone = Dropzone(app)
+
 
 invoices = wimm.structure.invoices
 #invoices = wimm.core.Invoices.from_yaml('invoices.yaml')
@@ -39,6 +43,11 @@ class SortableTable(Table):
             direction = 'asc'
         return url_for('index', sort=col_key, direction=direction)
 
+
+@app.route('/test')
+def test():
+    
+    return render_template('test.html')
 
 @app.route('/')
 def index():
