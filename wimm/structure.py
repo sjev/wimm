@@ -7,6 +7,8 @@ Used for initialization
 
 """
 
+
+
 settings = {'doc_nr': '%i_%03d',
             'invoices': {'received':  {'prefix':'INR', 'folder':'invoices_received'},
                        'sent':      {'prefix':'INS', 'folder':'invoices_sent'}}
@@ -45,3 +47,20 @@ transactions = [ {'date' : '2020-01-01',
                'to' : 'Assets.bank',
                'amount' : 150.0,
                'description' : 'Borrowed some money from Bob'    } ]
+
+
+#%% invoice definition
+
+
+
+def _make_test_invoices():
+    from wimm.core import Invoice
+    # create a couple of invoices for testing
+    dates = ['2020-01-01','2020-02-01','2020-02-10','2020-12-05']
+    #due_dates = ['2020-01-30','2020-02-15','2020-03-20','2021-01-05']
+    amounts = [70,50,25,1000]
+    senders = ['Bob','Bob','Alice','Alice']
+    
+    return [Invoice(*vals) for vals in zip(range(len(dates)),dates,amounts,senders)]
+    
+invoices = _make_test_invoices()

@@ -16,6 +16,9 @@ sys.path.insert(0, cwd.parent.as_posix())
 from wimm import core
 import wimm.structure as structure
 
+# create temp dir
+if not os.path.exists('tmp'):
+    os.mkdir('tmp')
 
 def test_parser():
     
@@ -23,6 +26,8 @@ def test_parser():
     res = core.parse_account(s)
     
     assert res == ['Equity','bank','savings']
+    
+
     
     
 def test_create_accounts():

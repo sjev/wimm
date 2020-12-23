@@ -37,6 +37,7 @@ from collections import UserDict, UserList
 import yaml
 import wimm.utils as utils
 import pandas as pd
+from dataclasses import dataclass
 
 def parse_account(s):
     """ parse entity and account string """
@@ -233,3 +234,16 @@ class Transactions(UserList):
         data = yaml.load(open(yaml_file), Loader=yaml.SafeLoader)
         return cls(data)
     
+@dataclass
+class Invoice:
+    number : int
+    date : str
+    amount : float
+    sender : str
+    inbound : bool = True # sent / recieved
+    due_date : str = None
+    amount_payed : float = 25.0
+    document : str = None
+    
+    def rest_amount(self):
+        return self.amount - self.amount_payed
