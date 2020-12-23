@@ -37,7 +37,7 @@ from collections import UserDict, UserList
 import yaml
 import wimm.utils as utils
 import pandas as pd
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict, is_dataclass
 
 def parse_account(s):
     """ parse entity and account string """
@@ -183,8 +183,33 @@ class Accounts(UserDict):
         return cls.from_dict(yaml.load(open(yaml_file), Loader=yaml.SafeLoader))
 
 
+class ListPlus(UserList):
+    """ base extensions for a list """
+    
+    
+    
+    def to_yaml(self, yaml_file=None):
+        """ write to file or return string """
+        
+        
+        data = [utils.to_dict(obj) for obj in self.data]
+        
+        if yaml_file:
+            utils.save_yaml(yaml_file, data ,ask_confirmation=False)
+     
+        return yaml.dump(data)
 
-class Transactions(UserList):
+        
+
+    @classmethod 
+    def from_yaml(cls,yaml_file):
+        """ create class from a yaml file """
+        
+        data = yaml.load(open(yaml_file), Loader=yaml.SafeLoader)
+        
+        return cls(data)
+
+class Transactions(ListPlus):
     """ transactons class, extension of a list """
 
     def apply(self, accounts, create_accounts=True):
@@ -217,22 +242,7 @@ class Transactions(UserList):
             accounts[get_account(t['from'])].subtract(t['amount'])
             accounts[get_account(t['to'])].add(t['amount'])
 
-    def to_yaml(self, yaml_file=None):
-        """ write to file or return string """
-        
-        if yaml_file:
-            utils.save_yaml(yaml_file, self.data ,ask_confirmation=False)
-     
-        return yaml.dump(self.data)
-
-        
-
-    @classmethod 
-    def from_yaml(cls,yaml_file):
-        """ create class from a yaml file """
-        
-        data = yaml.load(open(yaml_file), Loader=yaml.SafeLoader)
-        return cls(data)
+    
     
 @dataclass
 class Invoice:
@@ -247,3 +257,28 @@ class Invoice:
     
     def rest_amount(self):
         return self.amount - self.amount_payed
+    
+    def prefix(self):
+        "string prefix XXX_nr"
+        
+        symbols = {True:'R',False:'S'}
+        return f"IN{symbols[self.inbound]}_{self.number:03d}"
+        
+    def __repr__(self):
+        return "Invoice " + self.prefix()
+    
+class Invoices(ListPlus):
+    
+      def __init__(self, lst):
+        
+        objects = []
+        for d in lst:
+            if isinstance(d, Invoice):
+                objects.append(d)
+            else:
+                objects.append(Invoice(**d))
+
+        super().__init__(objects)
+    
+   
+    

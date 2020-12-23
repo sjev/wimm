@@ -83,4 +83,13 @@ def test_transactions():
      
     print(accounts)
     
+def test_invoices_roundtrip():
     
+    invoices = structure.invoices
+    
+    fname = 'tmp/invoices.yaml'
+    invoices.to_yaml(fname)
+    
+    invoices1 = core.Invoices.from_yaml(fname)
+    
+    assert invoices == invoices1

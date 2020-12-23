@@ -54,13 +54,13 @@ transactions = [ {'date' : '2020-01-01',
 
 
 def _make_test_invoices():
-    from wimm.core import Invoice
+    from wimm.core import Invoice, Invoices
     # create a couple of invoices for testing
     dates = ['2020-01-01','2020-02-01','2020-02-10','2020-12-05']
     #due_dates = ['2020-01-30','2020-02-15','2020-03-20','2021-01-05']
     amounts = [70,50,25,1000]
     senders = ['Bob','Bob','Alice','Alice']
-    
-    return [Invoice(*vals) for vals in zip(range(len(dates)),dates,amounts,senders)]
+    objects = [Invoice(*vals) for vals in zip(range(len(dates)),dates,amounts,senders)]
+    return Invoices(objects)
     
 invoices = _make_test_invoices()

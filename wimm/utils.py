@@ -10,6 +10,17 @@ import yaml
 import os
 import pandas as pd
 from pathlib import Path
+from dataclasses import asdict, is_dataclass
+
+def to_dict(obj):
+    """ convert object to dict """
+    if isinstance(obj, dict):
+        return obj
+    elif is_dataclass(obj):
+        return asdict(obj)
+    else:
+        return dict(obj)
+
 
 def timestamp():
     t=dt.datetime.now()
