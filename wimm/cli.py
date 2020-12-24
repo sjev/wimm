@@ -9,14 +9,41 @@ main cli application
 import wimm # app version is defined in __init__.py
 import wimm.utils as utils
 import wimm.core as core
+import wimm.structure as structure
 
 import os
 import click
+from click import echo
 import yaml
+from pathlib import Path
 
 
-entity = core.Entity()
 
+def get_path():
+    """ get path of database directory """
+
+    var = 'WIMM_PATH'
+    val = os.getenv(var)
+    
+    if not val:
+        echo(f"environment variable {var} not found. ")
+        import sys
+        sys.exit()
+        
+    return Path(val)
+
+def accounts():
+    """ load accounts """
+    
+    p = PATH / structure.files['accounts']
+    assert p.exists(), f"File {p} not found"
+    return core.Accounts.from_yaml(p)
+
+def transactions():
+    """ load transactions """
+    p = PATH / structure.files['transactions']
+    assert p.exists(), f"File {p} not found"
+    return core.Transactions.from_yaml(p)
 
 @click.group()
 @click.version_option(version=wimm.__version__)
@@ -34,13 +61,13 @@ def import_data():
 
 @click.command()
 def init():
-    """ initialize directories and necessary files """
+    """ initialize current directory with necessary files. Also creates a config file in user directory"""
     
     # create files
-    import wimm.structure as structure
-    utils.save_yaml(r'accounts.yaml',structure.accounts)
-    utils.save_yaml(r'settings.yaml', structure.settings)
-    utils.save_yaml(r'transactions.yaml', structure.transactions)
+    
+    utils.save_yaml(PATH / structure.files['accounts'], structure.accounts)
+    utils.save_yaml(PATH / structure.files['settings'], structure.settings)
+    utils.save_yaml(PATH / structure.files['transactions'], structure.transactions)
     
     # create folders
     for folder in structure.folders:
@@ -63,7 +90,7 @@ def import_statement(bank, account_name,data_file):
         print('ERROR: file not found')
         return
     
-    account = entity.accounts[account_name]
+    account = accounts()[account_name]
     transactions = account.parse_bank_statement(data_file)
     
     with open('transactions.yaml','a') as f:
@@ -74,24 +101,25 @@ def import_statement(bank, account_name,data_file):
 @click.command('balance')
 def show_balance():
     """ print current balance """
-   
+    
+    balance = core.balance(accounts(), transactions())
     
     print('----------Balance-----------')
-    print(entity.balance())
+    print(balance)
     print('----------------------------')
-    print(f'SUM: {entity.balance().sum():.2f}')
+    print(f'SUM: {balance.sum():.2f}')
 
 
 @click.command('transactions')
 def show_transactions():
     """ show transactions as yaml data """
     
-    print(entity.transactions.to_yaml())
+    print(transactions().to_yaml())
     
 @click.command('accounts')
 def show_accounts():
     """ show accounts """
-    for name in entity.accounts.keys():
+    for name in accounts().keys():
         print(name)
 
 # build groups
@@ -105,5 +133,8 @@ cli.add_command(init)
 cli.add_command(import_data)
 cli.add_command(show)
 
-if __name__ == "__main__":
+PATH = get_path()
+
+
+if __name__ == "__main__": # note - name will be wimm.cli in case of terminal cmd
     cli()

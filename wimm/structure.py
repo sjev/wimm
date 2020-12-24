@@ -14,7 +14,9 @@ settings = {'doc_nr': '%i_%03d',
                        'sent':      {'prefix':'INS', 'folder':'invoices_sent'}}
             }
 
-
+files = {'accounts':'accounts.yaml',
+         'transactions':'transactions.yaml',
+         'settings':'settings.yaml'}
 
 folders = [settings['invoices']['sent']['folder'],
            settings['invoices']['received']['folder']]

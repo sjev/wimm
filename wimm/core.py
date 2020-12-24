@@ -55,31 +55,17 @@ def get_account(item):
     return account
 
 
-class Entity:
-    """ class holding accounts and transactions for a company or a person """
-    
-    def __init__(self, 
-                 accounts_yaml = 'accounts.yaml',
-                 transactions_yaml = 'transactions.yaml'):
-        self.accounts = Accounts.from_yaml(accounts_yaml)
-        self.transactions = Transactions.from_yaml(transactions_yaml)
-        self.transactions.apply(self.accounts)
         
-    def balance(self):
-        """ calculate balance. Returns pd.Series """
-        
-        names = []
-        values = []
-        for k, acc in self.accounts.items():
-            names.append(k)
-            values.append(acc.value)
-        return pd.Series(data=values,index=names)
-
-    def __repr__(self):
-        return f"Entity Accounts:{len(self.accounts)} Transactions:{len(self.transactions)}"
-        
+def balance(accounts, transactions):
+    """ calculate balance """
+    transactions.apply(accounts)
     
-    
+    names = []
+    values = []
+    for k, acc in accounts.items():
+        names.append(k)
+        values.append(acc.value)
+    return pd.Series(data=values,index=names)
 
 class Account:
     """ account is what holds money """
