@@ -98,10 +98,10 @@ def test_invoice_id():
     """ check if invoice id is correct,
     should be XXXDD_DDD """
     
-    inv = core.Invoice('INR20_0001', "2020-01-01", 10)
+    _ = core.Invoice('INR20_0001', "2020-01-01", 10)
     
     with pytest.raises(ValueError):
-        inv = core.Invoice('INR20-0001', "2020-01-01", 10)
+        _ = core.Invoice('INR20-0001', "2020-01-01", 10)
     
     
 def test_invoices_functions():
@@ -112,4 +112,19 @@ def test_invoices_functions():
     assert inv.sender == 'Microsoft'
     
     inv = invoices.get_sorted_by('id', reverse=True)[0]
-    assert inv.description == 'ddd'
+    assert inv.description == 'bbb'
+    
+def test_invoices_aux():
+    """ test auxilary functions """
+    
+    fname = 'tmp/invoices.yaml'
+    invoices = core.Invoices.from_yaml(fname)
+    
+    res = invoices.get_by_id('INR00*')
+    assert len(res) == 1
+    assert res[0].id == "INR00_000"
+    
+    res = invoices.get_by_id('INR21*')
+    assert len(res) == 2
+    
+    assert res[-1].id == 'INR21_003'

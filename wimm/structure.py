@@ -56,7 +56,7 @@ transactions = [ {'date' : '2020-01-01',
 def _make_test_invoices():
     from wimm.core import Invoice, Invoices
     # create a couple of invoices for testing
-    ids = ['INR00_000','INR20_001','INS20_001','INR21_001','INS21_003']
+    ids = ['INR00_000','INR20_001','INS20_001','INR21_001','INR21_003']
     dates = ['2000-12-31','2020-01-01','2020-02-01','2020-02-10','2020-12-05']
     #due_dates = ['2020-01-30','2020-02-15','2020-03-20','2021-01-05']
     amounts = [0, 70,50,25,1000]

@@ -243,7 +243,7 @@ class Invoice:
     
     def __post_init__(self):
         
-        utils.validate(self.id, "I([A-Z]{2}[0-9]{2}_[0-9]{3})")
+        utils.validate(self.id, "IN([A-Z]{1}[0-9]{2}_[0-9]{3})")
         utils.validate(self.date, "([0-9]{4}-[0-9]{2}-[0-9]{2})")
     
     def rest_amount(self):
@@ -268,12 +268,27 @@ class Invoices(ListPlus):
                 objects.append(Invoice(**d))
 
         super().__init__(objects)
+      
+        
     
       def get_by_id(self, id):
-        """ get invoice from id """
-        for inv in self.data:
-            if inv.id == id:
-                return inv
+        """ get a invoice(s) by id 
+        id may be a partial string, with a wildcard *. Example INS*
+        """
+        
+        if id[-1] == '*': # multiple matching
+            pat = id[:-1]
+            n = len(pat)
+            matches = []
+            for inv in self.data:
+                if inv.id[:n] == pat:
+                    matches.append(inv)
+            return Invoices(matches).get_sorted_by('id')
+        
+        else:
+            for inv in self.data: #single matching
+                if inv.id == id:
+                    return inv
         
         raise KeyError('id not found')         
    
