@@ -174,14 +174,14 @@ class ListPlus(UserList):
     
     
     
-    def to_yaml(self, yaml_file=None):
+    def to_yaml(self, yaml_file=None, confirm = False):
         """ write to file or return string """
         
         
         data = [utils.to_dict(obj) for obj in self.data]
         
         if yaml_file:
-            utils.save_yaml(yaml_file, data ,ask_confirmation=False)
+            utils.save_yaml(yaml_file, data ,ask_confirmation=confirm)
      
         return yaml.dump(data)
 
@@ -232,26 +232,23 @@ class Transactions(ListPlus):
     
 @dataclass
 class Invoice:
-    number : int
+    id : int # 
     date : str
     amount : float
-    prefix : str = 'INV' #  INR / INS
     sender : str = None
+    description : str = ''
+    prefix : str = 'INV' #  INR / INS
     due_date : str = None
-    amount_payed : float = 25.0
-    document : str = None
+    amount_payed : float = 25.0  # 
+    documents : str = None
+    
     
     def rest_amount(self):
         return self.amount - self.amount_payed
     
-    @property
-    def id(self):
-        "string prefix XXX_nr"
-        
-        return f"{self.prefix}_{self.number:03d}"
-        
+         
     def __repr__(self):
-        return "Invoice " + self.name()
+        return "Invoice " + self.id
 
     def to_dict(self):
         return asdict(self)

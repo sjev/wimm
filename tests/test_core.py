@@ -98,8 +98,8 @@ def test_invoices_functions():
     
     invoices = structure.invoices
     
-    inv = invoices.get_by_id('INR_002')
-    assert inv.number == 2
+    inv = invoices.get_by_id('INR00_000')
+    assert inv.sender == 'Microsoft'
     
     inv = invoices.get_sorted_by('id', reverse=True)[0]
-    assert inv.number == 3
+    assert inv.description == 'ddd'

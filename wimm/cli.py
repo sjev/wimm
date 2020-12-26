@@ -45,10 +45,17 @@ def transactions():
     assert p.exists(), f"File {p} not found"
     return core.Transactions.from_yaml(p)
 
+@click.command()
+def info():
+    """ show status """
+    echo(f'Data location: {PATH}')    
+    
+
 @click.group()
 @click.version_option(version=wimm.__version__)
 def cli():
     pass
+
 
 @click.group()
 def show():
@@ -66,8 +73,10 @@ def init():
     # create files
     
     utils.save_yaml(PATH / structure.files['accounts'], structure.accounts)
-    utils.save_yaml(PATH / structure.files['settings'], structure.settings)
     utils.save_yaml(PATH / structure.files['transactions'], structure.transactions)
+    
+    core.Invoices([structure.invoices[0]]).to_yaml(PATH / structure.files['invoices_received'])
+  
     
     # create folders
     for folder in structure.folders:
@@ -122,6 +131,8 @@ def show_accounts():
     for name in accounts().keys():
         print(name)
 
+
+
 # build groups
 import_data.add_command(import_statement)    
     
@@ -132,6 +143,7 @@ show.add_command(show_accounts)
 cli.add_command(init)
 cli.add_command(import_data)
 cli.add_command(show)
+cli.add_command(info)
 
 PATH = get_path()
 

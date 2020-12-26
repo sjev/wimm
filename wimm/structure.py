@@ -9,17 +9,15 @@ Used for initialization
 
 
 
-settings = {'doc_nr': '%i_%03d',
-            'invoices': {'received':  {'prefix':'INR', 'folder':'invoices_received'},
-                       'sent':      {'prefix':'INS', 'folder':'invoices_sent'}}
-            }
+settings = {'doc_nr': '%i_%03d'}
+
 
 files = {'accounts':'accounts.yaml',
          'transactions':'transactions.yaml',
-         'settings':'settings.yaml'}
+         'settings':'settings.yaml',
+         'invoices':'invoices.yaml'}
 
-folders = [settings['invoices']['sent']['folder'],
-           settings['invoices']['received']['folder']]
+folders = ['invoices_sent', 'invoices_received']
 
 
 account_names = ['Assets', 
@@ -58,11 +56,13 @@ transactions = [ {'date' : '2020-01-01',
 def _make_test_invoices():
     from wimm.core import Invoice, Invoices
     # create a couple of invoices for testing
-    dates = ['2020-01-01','2020-02-01','2020-02-10','2020-12-05']
+    ids = ['INR00_000','INR20_001','INS20_001','INR21_001','INS21_003']
+    dates = ['2000-12-31','2020-01-01','2020-02-01','2020-02-10','2020-12-05']
     #due_dates = ['2020-01-30','2020-02-15','2020-03-20','2021-01-05']
-    amounts = [70,50,25,1000]
-    senders = ['Bob','Bob','Alice','Alice']
-    objects = [Invoice(*vals) for vals in zip(range(len(dates)),dates,amounts,len(dates)*['INR'],senders)]
+    amounts = [0, 70,50,25,1000]
+    senders = ['Microsoft','Bob','Bob','Alice','Alice']
+    descriptions = ['dummy invoice', 'aaa', 'bbb', 'ccc', 'ddd']
+    objects = [Invoice(*vals) for vals in zip(ids,dates,amounts,senders,descriptions)]
     return Invoices(objects)
     
 invoices = _make_test_invoices()
