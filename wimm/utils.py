@@ -11,6 +11,16 @@ import os
 import pandas as pd
 from pathlib import Path
 from dataclasses import asdict, is_dataclass
+import re
+
+
+def validate(s, regex):
+    """ validates a string against regular expression """
+    
+    pattern = re.compile(regex)
+    res = pattern.match(s)
+    if not res:
+        raise ValueError(f"{s} is not valid")
 
 def to_dict(obj):
     """ convert object to dict """

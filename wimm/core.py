@@ -237,11 +237,14 @@ class Invoice:
     amount : float
     sender : str = None
     description : str = ''
-    prefix : str = 'INV' #  INR / INS
     due_date : str = None
     amount_payed : float = 25.0  # 
     documents : str = None
     
+    def __post_init__(self):
+        
+        utils.validate(self.id, "I([A-Z]{2}[0-9]{2}_[0-9]{3})")
+        utils.validate(self.date, "([0-9]{4}-[0-9]{2}-[0-9]{2})")
     
     def rest_amount(self):
         return self.amount - self.amount_payed

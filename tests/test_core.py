@@ -94,6 +94,16 @@ def test_invoices_roundtrip():
     
     assert invoices == invoices1
     
+def test_invoice_id():
+    """ check if invoice id is correct,
+    should be XXXDD_DDD """
+    
+    inv = core.Invoice('INR20_0001', "2020-01-01", 10)
+    
+    with pytest.raises(ValueError):
+        inv = core.Invoice('INR20-0001', "2020-01-01", 10)
+    
+    
 def test_invoices_functions():
     
     invoices = structure.invoices
