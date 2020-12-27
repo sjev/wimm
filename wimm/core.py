@@ -290,10 +290,18 @@ class Invoices(ListPlus):
                 if inv.id == id:
                     return inv
         
-        raise KeyError('id not found')         
-   
-    
-     
+        raise KeyError('id not found')     
+        
+      def get_next_id(self, prefix):
+          """ get next available invoice number for a prefix """
+          
+          try:
+              id = self.get_by_id(prefix+'*')[-1].id
+          except IndexError: # prefix not found, make new one
+              return f"{prefix}{utils.timestamp('%y')}_000"
+          
+          nr = int(id[-3:]) + 1
+          return id[:-3] + '%03d' % nr
      
     
       def get_sorted_by(self, key, reverse = False):

@@ -32,9 +32,9 @@ def to_dict(obj):
         return dict(obj)
 
 
-def timestamp():
+def timestamp(fmt = "%Y-%m-%d_%H%M"):
     t=dt.datetime.now()
-    return t.strftime("%Y-%m-%d_%H%M")
+    return t.strftime(fmt)
 
 def date():
     return dt.datetime.now().strftime("%Y-%m-%d")

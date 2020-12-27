@@ -15,6 +15,7 @@ sys.path.insert(0, cwd.parent.as_posix())
 
 from wimm import core
 import wimm.structure as structure
+import wimm.utils as utils
 
 # create temp dir
 if not os.path.exists('tmp'):
@@ -128,3 +129,9 @@ def test_invoices_aux():
     assert len(res) == 2
     
     assert res[-1].id == 'INR21_003'
+    
+    year = utils.timestamp('%y')
+    assert invoices.get_next_id('FOO') == f"FOO{year}_000"
+    
+    assert invoices.get_next_id('INR') == "INR21_004"
+    assert invoices.get_next_id('INS') == "INS20_002"
