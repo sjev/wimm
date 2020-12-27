@@ -17,7 +17,7 @@ files = {'accounts':'accounts.yaml',
          'settings':'settings.yaml',
          'invoices':'invoices.yaml'}
 
-folders = ['invoices_sent', 'invoices_received']
+folders = {'INS':'invoices_sent', 'INR':'invoices_received'}
 
 
 account_names = ['Assets', 
@@ -53,16 +53,17 @@ transactions = [ {'date' : '2020-01-01',
 
 
 
-def _make_test_invoices():
+def invoices():
     from wimm.core import Invoice, Invoices
     # create a couple of invoices for testing
     ids = ['INR00_000','INR20_001','INS20_001','INR21_001','INR21_003']
     dates = ['2000-12-31','2020-01-01','2020-02-01','2020-02-10','2020-12-05']
     #due_dates = ['2020-01-30','2020-02-15','2020-03-20','2021-01-05']
     amounts = [0, 70,50,25,1000]
+    taxes = [0,10,20,4.3,12.0]
     senders = ['Microsoft','Bob','Bob','Alice','Alice']
     descriptions = ['dummy invoice', 'aaa', 'bbb', 'ccc', 'ddd']
-    objects = [Invoice(*vals) for vals in zip(ids,dates,amounts,senders,descriptions)]
+    objects = [Invoice(*vals) for vals in zip(ids,dates,amounts,taxes,senders,descriptions)]
     return Invoices(objects)
     
-invoices = _make_test_invoices()
+

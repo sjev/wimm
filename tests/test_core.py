@@ -86,7 +86,7 @@ def test_transactions():
     
 def test_invoices_roundtrip():
     
-    invoices = structure.invoices
+    invoices = structure.invoices()
     
     fname = 'tmp/invoices.yaml'
     invoices.to_yaml(fname)
@@ -107,7 +107,7 @@ def test_invoice_id():
     
 def test_invoices_functions():
     
-    invoices = structure.invoices
+    invoices = structure.invoices()
     
     inv = invoices.get_by_id('INR00_000')
     assert inv.sender == 'Microsoft'
@@ -131,7 +131,7 @@ def test_invoices_aux():
     assert res[-1].id == 'INR21_003'
     
     year = utils.timestamp('%y')
-    assert invoices.get_next_id('FOO') == f"FOO{year}_000"
+    assert invoices.get_next_id('FOO') == f"FOO{year}_001"
     
     assert invoices.get_next_id('INR') == "INR21_004"
     assert invoices.get_next_id('INS') == "INS20_002"

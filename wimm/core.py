@@ -37,12 +37,23 @@ from collections import UserDict, UserList
 import yaml
 import wimm.utils as utils
 import pandas as pd
-from dataclasses import dataclass, asdict, is_dataclass
+from dataclasses import dataclass, asdict, fields, _MISSING_TYPE
 
 def parse_account(s):
     """ parse entity and account string """
     
     return s.strip().split('.')
+
+def load_data(name, db_path):
+    """ load data from yaml """
+    import wimm.structure as structure
+    classes = {'accounts':Accounts, 
+               'transactions':Transactions,
+               'invoices':Invoices}
+    
+    p = db_path / structure.files[name]
+    assert p.exists(), f"File {p} not found"
+    return classes[name].from_yaml(p)
 
 
 def get_account(item):
@@ -232,20 +243,33 @@ class Transactions(ListPlus):
     
 @dataclass
 class Invoice:
-    id : int # 
+    id : str # 
     date : str
     amount : float
+    tax : float = 0
     sender : str = None
     description : str = ''
     due_date : str = None
-    amount_payed : float = 25.0  # 
     documents : str = None
     
     def __post_init__(self):
         
         utils.validate(self.id, "IN([A-Z]{1}[0-9]{2}_[0-9]{3})")
         utils.validate(self.date, "([0-9]{4}-[0-9]{2}-[0-9]{2})")
-    
+
+    @classmethod
+    def fields(cls):
+        """ return class fields in a form {field_name:default_val} """
+        
+        out = {}
+        for f in fields(cls):
+            out[f.name] = f.default if not isinstance(f.default, _MISSING_TYPE) else None
+        
+        return out
+
+    def to_yaml(self):
+        return yaml.dump(self.to_dict())
+
     def rest_amount(self):
         return self.amount - self.amount_payed
     
@@ -255,10 +279,12 @@ class Invoice:
 
     def to_dict(self):
         return asdict(self)
+    
+    
 
 class Invoices(ListPlus):
     
-      def __init__(self, lst):
+      def __init__(self, lst=[]):
         
         objects = []
         for d in lst:
@@ -298,7 +324,7 @@ class Invoices(ListPlus):
           try:
               id = self.get_by_id(prefix+'*')[-1].id
           except IndexError: # prefix not found, make new one
-              return f"{prefix}{utils.timestamp('%y')}_000"
+              return f"{prefix}{utils.timestamp('%y')}_001"
           
           nr = int(id[-3:]) + 1
           return id[:-3] + '%03d' % nr
