@@ -13,6 +13,7 @@ from pathlib import Path
 from dataclasses import asdict, is_dataclass
 import re
 
+DATE_FMT = "%Y-%m-%d"
 
 def tax(amount, rate=0.21):
     return -round(amount-amount/(1+rate), 2)
@@ -74,13 +75,19 @@ def to_dict(obj):
         return dict(obj)
 
 
-def timestamp(fmt="%Y-%m-%d_%H%M", offset_days=0):
+def timestamp(fmt=DATE_FMT+"_%H%M", offset_days=0):
     t = dt.datetime.now() + dt.timedelta(days=offset_days)
     return t.strftime(fmt)
 
 
 def date(offset=0):
-    return timestamp("%Y-%m-%d", offset)
+    return timestamp(DATE_FMT, offset)
+
+def date_offset(date_string, offset_days):
+    """ offset a date by a number of days """
+    
+    return  (dt.datetime.strptime(date_string, DATE_FMT) \
+             + dt.timedelta(days=offset_days)).strftime(DATE_FMT)
 
 
 def save_yaml(yaml_file, data, ask_confirmation=True):
@@ -215,4 +222,7 @@ class Hasher:
        if self.data_file.exists():
            self.data_file.unlink()
        
-       
+    def is_present(self,path):
+        """ check if a file is present in hashes """
+        hsh = md5(path)[0]
+        return hsh in self.hashes

@@ -30,12 +30,15 @@ def transactions():
 def invoices():
     return core.load_data('invoices', PATH)
 
+def hasher():
+    return utils.Hasher(PATH / structure.files['hashes'])
 
 @click.command()
 def info():
     """ show status """
     echo(f'Data location: {PATH}')
-
+    echo('Hashed files: %i' % len(hasher().hashes))
+    
 
 @click.group()
 @click.version_option(version=wimm.__version__)
@@ -87,11 +90,11 @@ def init_files():
 def init_hash():
     """ rebuild stored file hashes """
     
-    hasher = utils.Hasher(PATH / structure.files['hashes'])
-    hasher.delete_hashes()
+    h = hasher()
+    h.delete_hashes()
     
     for key in ['INR','INS']:
-        hasher.add(PATH / structure.folders[key])
+        h.add(PATH / structure.folders[key])
     
 
 @click.command('statement')
@@ -149,49 +152,64 @@ def show_invoices():
 
 
 @click.command('invoice')
-@click.argument("filename", autocompletion = ['foo.pdf', 'bar.pdf'])
-def add_invoice(filename):
+@click.argument("pattern")
+def add_invoice(pattern):
+    """ add invoice(s). For multiple files provide a search pattern, like *.pdf """
     
-    
-    src_file = Path(filename).absolute()
-    if not src_file.exists():
-        echo('File not found')
-        return
-    
-    import subprocess, sys
-    devnull = open(os.devnull, 'w')
-    opener ="open" if sys.platform == "darwin" else "xdg-open"
-    #subprocess.call([opener, src_file.as_posix()],stdout=devnull, stderr=devnull)
-    
-    echo('Adding invoce. negative amount = incoming invoice')
-    
-    data = {}
-    
-    data['amount'] = click.prompt('amount', type=float)
-    
-    prefix = 'INS' if data['amount'] > 0 else 'INR'
-    data['id'] = click.prompt('id',invoices().get_next_id(prefix))
-    data['tax'] = click.prompt('tax',utils.tax(data['amount']))
-    
-    if prefix == 'INR':
-        data['sender']  = click.prompt('sender')
+    if pattern[0] == '*':
+        files = [p.absolute() for p in Path('.').glob(pattern)]
+        files = sorted(files, key=os.path.getmtime) # sort on modification times
+        echo(f'Adding {len(files)} files')
+    else:
+        files = [Path(pattern).absolute()]
         
-    data['description'] = click.prompt('description')
-    data['date'] = click.prompt('date', utils.date())
-    data['due_date'] = click.prompt('due_date', utils.date(30))
     
-    dest_file = PATH / structure.folders[prefix] / (data['id']+'_'+src_file.name)
-    echo('copying file to:'+str(dest_file))
-    shutil.copy(src_file,dest_file)
-    
-    data['documents'] = dest_file.relative_to(PATH).as_posix()
-    
-    invoices_new = core.Invoices()
-    invoices_new.append(core.Invoice(**data))    
-    
-    
-    with open(PATH / structure.files['invoices'],'a') as f:
-        f.write(invoices_new.to_yaml())
+    for src_file in files:
+        if not src_file.exists():
+            echo('File not found')
+            continue
+        
+        hsh = hasher()
+        if hsh.is_present(src_file):
+            echo(f'{src_file} is already in database.')
+            continue
+        
+        
+        import subprocess, sys
+        devnull = open(os.devnull, 'w')
+        opener ="open" if sys.platform == "darwin" else "xdg-open"
+        subprocess.call([opener, src_file.as_posix()],stdout=devnull, stderr=devnull)
+        
+        echo('Adding invoce. negative amount = incoming invoice')
+        
+        data = {}
+        
+        data['amount'] = click.prompt('amount', type=float)
+        
+        prefix = 'INS' if data['amount'] > 0 else 'INR'
+        data['id'] = click.prompt('id',invoices().get_next_id(prefix))
+        data['tax'] = click.prompt('tax',utils.tax(data['amount']))
+        
+        if prefix == 'INR':
+            data['sender']  = click.prompt('sender')
+            
+        data['description'] = click.prompt('description')
+        data['date'] = click.prompt('date', utils.date())
+        data['due_date'] = click.prompt('due_date', utils.date_offset(data['date'],30))
+        
+        dest_file = PATH / structure.folders[prefix] / (data['id']+'_'+src_file.name.replace(' ','_'))
+        echo('copying file to:'+str(dest_file))
+        shutil.copy(src_file,dest_file)
+        hsh.add(dest_file)
+        
+        data['documents'] = dest_file.relative_to(PATH).as_posix()
+        
+        invoices_new = core.Invoices()
+        invoices_new.append(core.Invoice(**data))    
+        
+        
+        with open(PATH / structure.files['invoices'],'a') as f:
+            f.write(invoices_new.to_yaml())
 
 # build groups
 import_data.add_command(import_statement)
