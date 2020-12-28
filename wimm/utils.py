@@ -13,8 +13,10 @@ from pathlib import Path
 from dataclasses import asdict, is_dataclass
 import re
 
+
 def tax(amount, rate=0.21):
-    return -round(amount-amount/(1+rate),2)
+    return -round(amount-amount/(1+rate), 2)
+
 
 def dialog(data_in):
     """
@@ -32,10 +34,10 @@ def dialog(data_in):
     """
 
     data_out = {}
-    for key,val in data_in.items():
-        new_val = click.prompt(key,default=val)
+    for key, val in data_in.items():
+        new_val = click.prompt(key, default=val)
         data_out[key] = new_val
-        
+
     return data_out
 
 
@@ -78,7 +80,7 @@ def timestamp(fmt="%Y-%m-%d_%H%M", offset_days=0):
 
 
 def date(offset=0):
-    return timestamp("%Y-%m-%d",offset)
+    return timestamp("%Y-%m-%d", offset)
 
 
 def save_yaml(yaml_file, data, ask_confirmation=True):
@@ -152,3 +154,65 @@ def read_bank_statement(csv_file, bank='ASN'):
     df = df[relevant_cols]
 
     return df
+
+
+def md5(path):
+    """ calculate MD5 checksum may provide a dir or a file"""
+    import hashlib
+
+    def hash_file(p):
+        with p.open('rb') as fid:
+            hasher = hashlib.md5()
+            hasher.update(fid.read())
+            hsh = hasher.hexdigest()
+
+        return hsh
+
+    if path.is_dir():
+        hashes = []
+        for f in path.glob('*'):
+            if f.is_file():
+                hashes.append(hash_file(f))
+        return hashes
+
+    elif path.is_file():
+        return [hash_file(path)]
+
+    else:
+        raise ValueError('provide path to file or dir')
+
+
+class Hasher:
+    """ class to manage file hashes 
+    hashes are stored as  hash per line
+
+    """
+
+    def __init__(self, data_file):
+
+        self.data_file = Path(data_file)
+
+        if self.data_file.exists():
+            with self.data_file.open('r') as fid:
+                lines = fid.readlines()
+            
+            
+            self.hashes = [l.strip() for l in lines]
+        else:
+            self.hashes = []
+            
+    def add(self, path):
+        """ add hashes of a file or path """
+        
+        hashes = md5(path)
+        with self.data_file.open('a') as f:
+            for l in hashes:
+                f.write(l+'\n')
+
+    def delete_hashes(self):
+       """ clear all hashes """
+       self.hashes = []
+       if self.data_file.exists():
+           self.data_file.unlink()
+       
+       

@@ -15,9 +15,12 @@ settings = {'doc_nr': '%i_%03d'}
 files = {'accounts':'accounts.yaml',
          'transactions':'transactions.yaml',
          'settings':'settings.yaml',
-         'invoices':'invoices.yaml'}
+         'invoices':'invoices.yaml',
+         'hashes': '.wimm/hashes'}
 
-folders = {'INS':'invoices_sent', 'INR':'invoices_received'}
+folders = {'INS':'invoices_sent', 
+           'INR':'invoices_received',
+           'WIMM':'.wimm'}
 
 
 account_names = ['Assets', 

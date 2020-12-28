@@ -59,9 +59,13 @@ def import_data():
     """ import statements, documents etc. """
     pass
 
-
-@click.command()
+@click.group()
 def init():
+    """ initialize data, use with caution """
+    pass
+
+@click.command('files')
+def init_files():
     """ initialize current directory with necessary files. Also creates a config file in user directory"""
 
     # create files
@@ -74,10 +78,21 @@ def init():
     # create folders
     for folder in structure.folders.values():
         try:
-            os.mkdir(folder)
+            (PATH / folder).mkdir()
         except Exception as e:
             print('Could not create folder:', e)
 
+
+@click.command('hash')
+def init_hash():
+    """ rebuild stored file hashes """
+    
+    hasher = utils.Hasher(PATH / structure.files['hashes'])
+    hasher.delete_hashes()
+    
+    for key in ['INR','INS']:
+        hasher.add(PATH / structure.folders[key])
+    
 
 @click.command('statement')
 @click.option('--bank', default='ASN', help='type of bank statement')
@@ -185,6 +200,9 @@ show.add_command(show_balance)
 show.add_command(show_transactions)
 show.add_command(show_accounts)
 show.add_command(show_invoices)
+
+init.add_command(init_files)
+init.add_command(init_hash)
 
 add.add_command(add_invoice)
 
