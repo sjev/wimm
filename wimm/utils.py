@@ -226,3 +226,11 @@ class Hasher:
         """ check if a file is present in hashes """
         hsh = md5(path)[0]
         return hsh in self.hashes
+    
+def names_to_labels(names, depth = 1, sep='.'):
+    """ split names to grouping labels """
+    labels = []
+    for name in names:
+        fields  = name.split(sep)
+        labels.append('.'.join(fields[:depth]) if len(fields) >= depth else name)
+    return labels

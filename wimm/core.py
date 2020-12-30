@@ -67,8 +67,11 @@ def get_account(item):
 
 
         
-def balance(accounts, transactions):
+def balance(accounts, transactions, invoices = None, depth = None):
     """ calculate balance """
+    if invoices is not None:
+        accounts.add_invoices(invoices)
+    
     transactions.apply(accounts)
     
     names = []
@@ -76,7 +79,14 @@ def balance(accounts, transactions):
     for k, acc in accounts.items():
         names.append(k)
         values.append(acc.value)
-    return pd.Series(data=values,index=names)
+        
+       
+        
+    if depth is None:    
+        return pd.Series(data=values,index=names)
+    else:
+        return pd.Series(data=values,index=names).groupby(utils.names_to_labels(names,depth)).sum()
+        
 
 class Account:
     """ account is what holds money """
@@ -148,13 +158,19 @@ class Accounts(UserDict):
             total += v.value        
         return total
     
-    def create(self,name):
+    def create(self,name,start_value = 0.0):
         """ add account """
-        self.__setitem__(name,Account(name))
+        self.__setitem__(name,Account(name,start_value))
     
     def exists(self, key):
         """ check if account exists """
         return True if key in self.keys() else False
+    
+    def add_invoices(self,invoices):
+        """ add accounts corresponding to invoices """
+        for inv in invoices:
+            self.create('Invoices.'+inv.id, inv.amount)
+    
     
     def to_yaml(self, yaml_file):
         

@@ -18,8 +18,8 @@ files = {'accounts':'accounts.yaml',
          'invoices':'invoices.yaml',
          'hashes': '.wimm/hashes'}
 
-folders = {'INS':'invoices_sent', 
-           'INR':'invoices_received',
+folders = {'INS':'invoices', 
+           'INR':'invoices',
            'WIMM':'.wimm'}
 
 

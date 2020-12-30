@@ -118,13 +118,14 @@ def import_statement(bank, account_name, data_file):
 
 
 @click.command('balance')
-def show_balance():
+@click.option('--depth', default=2, help='account depth level to show')
+def show_balance(depth):
     """ print current balance """
 
-    balance = core.balance(accounts(), transactions())
+    balance = core.balance(accounts(), transactions(), invoices(), depth=depth)
 
     print('----------Balance-----------')
-    print(balance)
+    print(balance.to_string())
     print('----------------------------')
     print(f'SUM: {balance.sum():.2f}')
 
@@ -233,8 +234,11 @@ cli.add_command(add)
 
 
 
-PATH = utils.get_path()
+
 
 
 if __name__ == "__main__":  # note - name will be wimm.cli in case of terminal cmd
-    cli()
+    
+    PATH = list(Path(__file__).parents)[1] / 'tests/data'
+else:
+    PATH = utils.get_path() 
