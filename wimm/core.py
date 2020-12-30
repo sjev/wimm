@@ -47,14 +47,17 @@ def parse_account(s):
 def load_data(name, db_path):
     """ load data from yaml """
     import wimm.structure as structure
-    classes = {'accounts':Accounts, 
-               'transactions':Transactions,
-               'invoices':Invoices}
+    fcns = {'start_balance': load_start_balance, 
+               'transactions':Transactions.from_yaml,
+               'invoices':Invoices.from_yaml}
     
     p = db_path / structure.files[name]
     assert p.exists(), f"File {p} not found"
-    return classes[name].from_yaml(p)
+    return fcns[name](p)
 
+def load_start_balance(yaml_file):
+    d = yaml.load(open(yaml_file), Loader=yaml.SafeLoader)
+    return pd.Series(d)
 
 def get_account(item):
     """ return account from an item. Can be a string or a dict """
@@ -65,47 +68,7 @@ def get_account(item):
         
     return account
 
-
-        
-def balance(accounts, transactions, invoices = None, depth = None):
-    """ calculate balance """
-    if invoices is not None:
-        accounts.add_invoices(invoices)
-    
-    transactions.apply(accounts)
-    
-    names = []
-    values = []
-    for k, acc in accounts.items():
-        names.append(k)
-        values.append(acc.value)
-        
-       
-        
-    if depth is None:    
-        return pd.Series(data=values,index=names)
-    else:
-        return pd.Series(data=values,index=names).groupby(utils.names_to_labels(names,depth)).sum()
-        
-
-class Account:
-    """ account is what holds money """
-    
-    def __init__(self, name, start_value = 0.0):
-        self.name = name
-        self.value = start_value
-        
-       
-    def add(self, amount):
-        self.value += amount
-    
-    def subtract(self, amount):
-        self.value -= amount
-        
-    def __repr__(self):
-        return f"{self.name}:{self.value:.2f}"
-        
-    def parse_bank_statement(self, statement_file, bank = 'ASN'):
+def parse_bank_statement(self, statement_file, acct_name = 'Assets.bank', bank = 'ASN'):
         """
         parse bank statement
 
@@ -113,6 +76,8 @@ class Account:
         ----------
         statement_file : string
             csv or other file to parse
+        acct_name : string
+            account name to use (from/to name)
         bank : string, optional
             Type of statement. The default is 'ASN'.
 
@@ -131,15 +96,15 @@ class Account:
             
             #init data element
             d = {}
-            
+            # TODO : remove nested data
             if r['amount'] < 0: # withdrawal
                 d['amount'] = -r['amount']
-                d['from'] = self.name
+                d['from'] = acct_name
                 d['to'] = {'account': 'Ext.Unknown', 'name':r['name'], 'iban':r['iban_other']}
             else:
                 d['amount'] = r['amount']
                 d['from'] = {'account': 'Ext.Unknown', 'name':r['name'], 'iban':r['iban_other']}
-                d['to'] = self.name
+                d['to'] = acct_name
             
             d['date'] = r['date']
             d['description'] = r['description']
@@ -148,52 +113,31 @@ class Account:
         
         return Transactions(data)
 
-class Accounts(UserDict):
-    """ dictionary holding multiple accounts """
-         
-    def sum(self):
         
-        total = 0
-        for k,v in self.items():
-            total += v.value        
-        return total
+def balance(transactions, start_balance = None, invoices = None, depth = None):
+    """ calculate balance """
+    # if invoices is not None:
+    #     accounts.add_invoices(invoices)
     
-    def create(self,name,start_value = 0.0):
-        """ add account """
-        self.__setitem__(name,Account(name,start_value))
+    # transactions.apply(accounts)
     
-    def exists(self, key):
-        """ check if account exists """
-        return True if key in self.keys() else False
+    # names = []
+    # values = []
+    # for k, acc in accounts.items():
+    #     names.append(k)
+    #     values.append(acc.value)
     
-    def add_invoices(self,invoices):
-        """ add accounts corresponding to invoices """
-        for inv in invoices:
-            self.create(inv.id, inv.amount)
+    accounts = transactions.process()    
+    if start_balance is not None:
+        accounts = accounts.add(start_balance, fill_value = 0)
     
-    
-    def to_yaml(self, yaml_file):
+    names = accounts.index.to_list()
         
-        data_dict = {}
-        for name, account in self.items():
-            data_dict[name] = account.value
-        
-        utils.save_yaml(yaml_file, data_dict ,ask_confirmation=False)
-      
-    @classmethod
-    def from_dict(cls, data_dict):
-        
-        data = {}
-        for name,val in data_dict.items():
-            data[name] = Account(name,val)
-        
-        return cls(data)    
-    
-    @classmethod 
-    def from_yaml(cls,yaml_file):
-        """ create class from a yaml file """
-               
-        return cls.from_dict(yaml.load(open(yaml_file), Loader=yaml.SafeLoader))
+    if depth is None:    
+        return accounts
+    else:
+        return accounts.groupby(utils.names_to_labels(names,depth)).sum()
+
 
 
 class ListPlus(UserList):
@@ -225,37 +169,14 @@ class ListPlus(UserList):
 class Transactions(ListPlus):
     """ transactons class, extension of a list """
 
-    def apply(self, accounts, create_accounts=True):
-        """
-        apply transactions to accounts 
 
-        Parameters
-        ----------
-        accounts : dict
-            accounts and their values
-        create_accounts : TYPE, optional
-            automatically creaate accounts if these don't exist.
-            raise exception otherwise
+    def process(self):
+        """ return accounts and their balances """
+        tr = pd.DataFrame.from_records(self.data)
+        print(tr)
+        return tr.groupby(['to']).amount.sum().subtract(tr.groupby(['from']).amount.sum(), fill_value=0)        
 
-        Returns
-        -------
-        None.
 
-        """
-        
-        for t in self:
-            for data in [t['from'],t['to']]:
-                account = get_account(data)
-                if not accounts.exists(account):
-                    if create_accounts:
-                        accounts.create(account)
-                    else:
-                        raise ValueError(f'Account {account} does not exist')
-            
-            accounts[get_account(t['from'])].subtract(t['amount'])
-            accounts[get_account(t['to'])].add(t['amount'])
-
-    
     
 @dataclass
 class Invoice:

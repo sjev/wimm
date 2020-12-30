@@ -12,7 +12,7 @@ Used for initialization
 settings = {'doc_nr': '%i_%03d'}
 
 
-files = {'accounts':'accounts.yaml',
+files = {'start_balance':'start_balance.yaml',
          'transactions':'transactions.yaml',
          'settings':'settings.yaml',
          'invoices':'invoices.yaml',
@@ -33,7 +33,7 @@ account_names = ['Assets',
 accounts = dict(zip(account_names, len(account_names)*[0.0]))
 
 transactions = [ {'date' : '2020-01-01',
-               'from' : {'account':'Ext.Bob','name':'Bob','iban':12345},
+               'from' : 'Ext.Bob',
                'to' : 'Assets.bank',
                'amount' : 1000.0,
                'description' : 'Customer paid invoice'},

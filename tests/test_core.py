@@ -31,38 +31,7 @@ def test_parser():
 
     
     
-def test_create_accounts():
-    
-    # --- create with dict
-    
-    acc = core.Accounts.from_dict(structure.accounts)
-    
-    for name in structure.account_names:
-        assert acc.exists(name) 
-        
-    assert acc.exists('foo') == False
-    
-    acc.create('foo')
-    assert acc.exists('foo') == True
-    
-    acc['Assets'].value = 150.0
-    
-    assert acc.sum() == 150
-  
-def test_accounts_roundtrip():    
 
-    accounts = core.Accounts.from_dict(structure.accounts)
-    
-    
-    accounts['Assets.Bank'].value = 100
-    assert accounts['Assets.Bank'].value == 100.0
-    accounts.to_yaml('accounts.yaml')
-
-
-    # --- cretate from file
-    acc = core.Accounts.from_yaml('accounts.yaml')
-    for k in accounts.keys():
-        assert acc[k].value == accounts[k].value
     
 def test_transactions_roundtrip():
     
@@ -76,9 +45,9 @@ def test_transactions_roundtrip():
 def test_transactions():
     """ test applying transactions to accounts """
     
-    accounts = core.Accounts()
+    #accounts = core.Accounts()
     transactions = core.Transactions.from_yaml('transactions.yaml')
-    transactions.apply(accounts, create_accounts=True)
+    accounts = transactions.process()
     
     assert accounts.sum() == 0
      

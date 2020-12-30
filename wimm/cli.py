@@ -19,8 +19,8 @@ from click import echo
 
 
 
-def accounts():
-    return core.load_data('accounts', PATH)
+def start_balance():
+    return core.load_data('start_balance', PATH)
 
 
 def transactions():
@@ -122,7 +122,7 @@ def import_statement(bank, account_name, data_file):
 def show_balance(depth):
     """ print current balance """
 
-    balance = core.balance(accounts(), transactions(), invoices(), depth=depth)
+    balance = core.balance(transactions(), start_balance(), invoices(), depth=depth)
 
     print('----------Balance-----------')
     print(balance.to_string())
