@@ -123,7 +123,6 @@ def parse_bank_statement(self, statement_file, acct_name='Assets.bank', bank='AS
 
 def balance(transactions, start_balance=None, invoices=None, depth=None):
     """ calculate balance """
-   
 
     accounts = transactions.process()
     if start_balance is not None:
@@ -258,3 +257,8 @@ class Invoices(ListPlus):
         return sorted(self,
                       key=lambda x: getattr(x, key),
                       reverse=reverse)
+
+    def to_df(self):
+        """ convert to DataFrame """
+        records = [inv.to_dict() for inv in self.data]
+        return pd.DataFrame.from_records(records)

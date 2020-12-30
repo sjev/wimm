@@ -137,19 +137,12 @@ def show_transactions():
     print(transactions().to_yaml())
 
 
-@click.command('accounts')
-def show_accounts():
-    """ show accounts """
-    for name in accounts().keys():
-        print(name)
-
 
 @click.command('invoices')
 def show_invoices():
     """ show invoices """
 
-    for inv in invoices():
-        print(inv)
+    print(invoices().to_df().to_string())
 
 
 @click.command('invoice')
@@ -217,7 +210,6 @@ import_data.add_command(import_statement)
 
 show.add_command(show_balance)
 show.add_command(show_transactions)
-show.add_command(show_accounts)
 show.add_command(show_invoices)
 
 init.add_command(init_files)
