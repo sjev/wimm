@@ -120,10 +120,14 @@ def import_statement(bank, account_name, data_file):
 
 @click.command('balance')
 @click.option('--depth', default=2, help='account depth level to show')
-def show_balance(depth):
+@click.option('--nozeros', is_flag=True)
+def show_balance(depth,nozeros):
     """ print current balance """
 
     balance = core.balance(transactions(), start_balance(), invoices(), depth=depth)
+    
+    if nozeros:
+        balance = balance[balance != 0]
 
     print('----------Balance-----------')
     print(balance.to_string())
