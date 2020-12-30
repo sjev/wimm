@@ -33,175 +33,166 @@ A tranaction may be taxed (with a VAT for example)
 
 
 """
-from collections import UserDict, UserList
+from collections import UserList
 import yaml
 import wimm.utils as utils
 import pandas as pd
 from dataclasses import dataclass, asdict, fields, _MISSING_TYPE
 
+
 def parse_account(s):
     """ parse entity and account string """
-    
+
     return s.strip().split('.')
+
 
 def load_data(name, db_path):
     """ load data from yaml """
     import wimm.structure as structure
-    fcns = {'start_balance': load_start_balance, 
-               'transactions':Transactions.from_yaml,
-               'invoices':Invoices.from_yaml}
-    
+    fcns = {'start_balance': load_start_balance,
+            'transactions': Transactions.from_yaml,
+            'invoices': Invoices.from_yaml}
+
     p = db_path / structure.files[name]
     assert p.exists(), f"File {p} not found"
     return fcns[name](p)
+
 
 def load_start_balance(yaml_file):
     d = yaml.load(open(yaml_file), Loader=yaml.SafeLoader)
     return pd.Series(d)
 
+
 def get_account(item):
     """ return account from an item. Can be a string or a dict """
     try:
-        account = item['account'] # try value from dict
+        account = item['account']  # try value from dict
     except TypeError:
         account = item
-        
+
     return account
 
-def parse_bank_statement(self, statement_file, acct_name = 'Assets.bank', bank = 'ASN'):
-        """
-        parse bank statement
 
-        Parameters
-        ----------
-        statement_file : string
-            csv or other file to parse
-        acct_name : string
-            account name to use (from/to name)
-        bank : string, optional
-            Type of statement. The default is 'ASN'.
+def parse_bank_statement(self, statement_file, acct_name='Assets.bank', bank='ASN'):
+    """
+    parse bank statement
 
-        Returns
-        -------
-        Transactions 
+    Parameters
+    ----------
+    statement_file : string
+        csv or other file to parse
+    acct_name : string
+        account name to use (from/to name)
+    bank : string, optional
+        Type of statement. The default is 'ASN'.
 
-        """
-        
-        df = utils.read_bank_statement(statement_file, bank)
-        records = df.to_dict(orient='records')
-        
-        data = []
-        
-        for r in records:
-            
-            #init data element
-            d = {}
-            # TODO : remove nested data
-            if r['amount'] < 0: # withdrawal
-                d['amount'] = -r['amount']
-                d['from'] = acct_name
-                d['to'] = {'account': 'Ext.Unknown', 'name':r['name'], 'iban':r['iban_other']}
-            else:
-                d['amount'] = r['amount']
-                d['from'] = {'account': 'Ext.Unknown', 'name':r['name'], 'iban':r['iban_other']}
-                d['to'] = acct_name
-            
-            d['date'] = r['date']
-            d['description'] = r['description']
-                
-            data.append(d)
-        
-        return Transactions(data)
+    Returns
+    -------
+    Transactions 
 
-        
-def balance(transactions, start_balance = None, invoices = None, depth = None):
+    """
+
+    df = utils.read_bank_statement(statement_file, bank)
+    records = df.to_dict(orient='records')
+
+    data = []
+
+    for r in records:
+
+        # init data element
+        d = {}
+        # TODO : remove nested data
+        if r['amount'] < 0:  # withdrawal
+            d['amount'] = -r['amount']
+            d['from'] = acct_name
+            d['to'] = {'account': 'Ext.Unknown',
+                       'name': r['name'], 'iban': r['iban_other']}
+        else:
+            d['amount'] = r['amount']
+            d['from'] = {'account': 'Ext.Unknown',
+                         'name': r['name'], 'iban': r['iban_other']}
+            d['to'] = acct_name
+
+        d['date'] = r['date']
+        d['description'] = r['description']
+
+        data.append(d)
+
+    return Transactions(data)
+
+
+def balance(transactions, start_balance=None, invoices=None, depth=None):
     """ calculate balance """
-    # if invoices is not None:
-    #     accounts.add_invoices(invoices)
-    
-    # transactions.apply(accounts)
-    
-    # names = []
-    # values = []
-    # for k, acc in accounts.items():
-    #     names.append(k)
-    #     values.append(acc.value)
-    
-    accounts = transactions.process()    
+   
+
+    accounts = transactions.process()
     if start_balance is not None:
-        accounts = accounts.add(start_balance, fill_value = 0)
-    
+        accounts = accounts.add(start_balance, fill_value=0)
+
     names = accounts.index.to_list()
-        
-    if depth is None:    
+
+    if depth is None:
         return accounts
     else:
-        return accounts.groupby(utils.names_to_labels(names,depth)).sum()
-
+        return accounts.groupby(utils.names_to_labels(names, depth)).sum()
 
 
 class ListPlus(UserList):
     """ base extensions for a list """
-    
-    
-    
-    def to_yaml(self, yaml_file=None, confirm = False):
+
+    def to_yaml(self, yaml_file=None, confirm=False):
         """ write to file or return string """
-        
-        
+
         data = [utils.to_dict(obj) for obj in self.data]
-        
+
         if yaml_file:
-            utils.save_yaml(yaml_file, data ,ask_confirmation=confirm)
-     
+            utils.save_yaml(yaml_file, data, ask_confirmation=confirm)
+
         return yaml.dump(data)
 
-        
-
-    @classmethod 
-    def from_yaml(cls,yaml_file):
+    @classmethod
+    def from_yaml(cls, yaml_file):
         """ create class from a yaml file """
-        
+
         data = yaml.load(open(yaml_file), Loader=yaml.SafeLoader)
-        
+
         return cls(data)
+
 
 class Transactions(ListPlus):
     """ transactons class, extension of a list """
 
-
     def process(self):
         """ return accounts and their balances """
         tr = pd.DataFrame.from_records(self.data)
-        print(tr)
-        return tr.groupby(['to']).amount.sum().subtract(tr.groupby(['from']).amount.sum(), fill_value=0)        
+        return tr.groupby(['to']).amount.sum().subtract(tr.groupby(['from']).amount.sum(), fill_value=0)
 
 
-    
 @dataclass
 class Invoice:
-    id : str # 
-    date : str
-    amount : float
-    tax : float = 0
-    sender : str = None
-    description : str = ''
-    due_date : str = None
-    documents : str = None
-    
+    id: str
+    date: str
+    amount: float
+    tax: float = 0
+    sender: str = None
+    description: str = ''
+    due_date: str = None
+    documents: str = None
+
     def __post_init__(self):
-        
+
         utils.validate(self.id, "IN([A-Z]{1}.[0-9]{2}_[0-9]{3})")
         utils.validate(self.date, "([0-9]{4}-[0-9]{2}-[0-9]{2})")
 
     @classmethod
     def fields(cls):
         """ return class fields in a form {field_name:default_val} """
-        
+
         out = {}
         for f in fields(cls):
-            out[f.name] = f.default if not isinstance(f.default, _MISSING_TYPE) else None
-        
+            out[f.name] = f.default if not isinstance(
+                f.default, _MISSING_TYPE) else None
+
         return out
 
     def to_yaml(self):
@@ -209,20 +200,18 @@ class Invoice:
 
     def rest_amount(self):
         return self.amount - self.amount_payed
-    
-         
+
     def __repr__(self):
         return f"Invoice {self.id} {self.amount}"
 
     def to_dict(self):
         return asdict(self)
-    
-    
+
 
 class Invoices(ListPlus):
-    
-      def __init__(self, lst=[]):
-        
+
+    def __init__(self, lst=[]):
+
         objects = []
         for d in lst:
             if isinstance(d, Invoice):
@@ -231,15 +220,13 @@ class Invoices(ListPlus):
                 objects.append(Invoice(**d))
 
         super().__init__(objects)
-      
-        
-    
-      def get_by_id(self, id):
+
+    def get_by_id(self, id):
         """ get a invoice(s) by id 
         id may be a partial string, with a wildcard *. Example INS*
         """
-        
-        if id[-1] == '*': # multiple matching
+
+        if id[-1] == '*':  # multiple matching
             pat = id[:-1]
             n = len(pat)
             matches = []
@@ -247,28 +234,27 @@ class Invoices(ListPlus):
                 if inv.id[:n] == pat:
                     matches.append(inv)
             return Invoices(matches).get_sorted_by('id')
-        
+
         else:
-            for inv in self.data: #single matching
+            for inv in self.data:  # single matching
                 if inv.id == id:
                     return inv
-        
-        raise KeyError('id not found')     
-        
-      def get_next_id(self, prefix):
-          """ get next available invoice number for a prefix """
-          
-          try:
-              id = self.get_by_id(prefix+'*')[-1].id
-          except IndexError: # prefix not found, make new one
-              return f"{prefix}{utils.timestamp('%y')}_001"
-          
-          nr = int(id[-3:]) + 1
-          return id[:-3] + '%03d' % nr
-     
-    
-      def get_sorted_by(self, key, reverse = False):
-          
-          return sorted(self,
-                        key = lambda x: getattr(x, key),
-                        reverse = reverse)
+
+        raise KeyError('id not found')
+
+    def get_next_id(self, prefix):
+        """ get next available invoice number for a prefix """
+
+        try:
+            id = self.get_by_id(prefix+'*')[-1].id
+        except IndexError:  # prefix not found, make new one
+            return f"{prefix}{utils.timestamp('%y')}_001"
+
+        nr = int(id[-3:]) + 1
+        return id[:-3] + '%03d' % nr
+
+    def get_sorted_by(self, key, reverse=False):
+
+        return sorted(self,
+                      key=lambda x: getattr(x, key),
+                      reverse=reverse)
