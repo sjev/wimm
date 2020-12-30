@@ -1,0 +1,22 @@
+- amount: 5000.0
+  date: '2020-01-01'
+  description: Customer paid invoice
+  from: INS.20_001
+  to: Assets.bank
+- amount: 50.0
+  category: office supplies
+  date: '2020-01-02'
+  description: bought some pens
+  from: Assets.bank
+  to: Expenses
+- amount: 150.0
+  date: '2020-01-03'
+  description: Borrowed some money from Bob
+  from: Bob
+  to: Assets.bank
+- amount: 33.28
+  date: '2020-01-03'
+  description: Payed INR20_001
+  from: Assets.bank
+  to: INR.20_001
+
