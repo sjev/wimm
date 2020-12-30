@@ -105,12 +105,13 @@ def import_statement(bank, account_name, data_file):
     """import bank statement to the end of `transactions.yaml`"""
     print(f'importing {data_file}')
 
+    raise NotImplementedError('Function is not ready yet. ')
     if not os.path.exists(data_file):
         print('ERROR: file not found')
         return
 
-    account = accounts()[account_name]
-    transactions = account.parse_bank_statement(data_file)
+    # TODO: fix this   
+    transactions = utils.parse_bank_statement(data_file)
 
     with open('transactions.yaml', 'a') as f:
         f.write(f'\n# ---IMPORT--- at {utils.timestamp()} file: {data_file}\n')

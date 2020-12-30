@@ -125,9 +125,14 @@ def balance(transactions, start_balance=None, invoices=None, depth=None):
     """ calculate balance """
 
     accounts = transactions.process()
+    
     if start_balance is not None:
         accounts = accounts.add(start_balance, fill_value=0)
 
+    if invoices is not None:
+        inv_acc  = invoices.to_accounts() # convert to series
+        accounts = accounts.add(inv_acc, fill_value=0)
+        
     names = accounts.index.to_list()
 
     if depth is None:
@@ -262,3 +267,12 @@ class Invoices(ListPlus):
         """ convert to DataFrame """
         records = [inv.to_dict() for inv in self.data]
         return pd.DataFrame.from_records(records)
+
+    def to_accounts(self):
+        """ convert to accounts, including taxes """
+        df =self.to_df()
+        acc = df.set_index('id')['amount'] # account series
+        tax = pd.Series( [df.tax[df.tax>0].sum(),
+                    df.tax[df.tax<0].sum()],
+                    index=['tax.to_receive','tax.to_pay'])
+        return pd.concat((acc,tax))
