@@ -169,7 +169,7 @@ class Accounts(UserDict):
     def add_invoices(self,invoices):
         """ add accounts corresponding to invoices """
         for inv in invoices:
-            self.create('Invoices.'+inv.id, inv.amount)
+            self.create(inv.id, inv.amount)
     
     
     def to_yaml(self, yaml_file):
@@ -270,7 +270,7 @@ class Invoice:
     
     def __post_init__(self):
         
-        utils.validate(self.id, "IN([A-Z]{1}[0-9]{2}_[0-9]{3})")
+        utils.validate(self.id, "IN([A-Z]{1}.[0-9]{2}_[0-9]{3})")
         utils.validate(self.date, "([0-9]{4}-[0-9]{2}-[0-9]{2})")
 
     @classmethod
@@ -291,7 +291,7 @@ class Invoice:
     
          
     def __repr__(self):
-        return "Invoice " + self.id
+        return f"Invoice {self.id} {self.amount}"
 
     def to_dict(self):
         return asdict(self)
