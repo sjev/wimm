@@ -20,7 +20,7 @@ from click import echo
 
 
 def start_balance():
-    return core.load_data('start_balance', PATH)
+    return core.load_data('balance', PATH)
 
 
 def transactions():
@@ -72,7 +72,7 @@ def init_files():
     """ initialize current directory with necessary files. Also creates a config file in user directory"""
 
     # create files
-    utils.save_yaml(PATH / structure.files['accounts'], structure.accounts)
+    utils.save_yaml(PATH / structure.files['balance'], structure.accounts)
     utils.save_yaml(
         PATH / structure.files['transactions'], structure.transactions)
     core.Invoices([structure.invoices()[0]]).to_yaml(
@@ -80,10 +80,9 @@ def init_files():
 
     # create folders
     for folder in structure.folders.values():
-        try:
-            (PATH / folder).mkdir()
-        except Exception as e:
-            print('Could not create folder:', e)
+        p = PATH / folder
+        if not p.exists():
+            p.mkdir()
 
 
 @click.command('hash')

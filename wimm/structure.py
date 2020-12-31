@@ -12,7 +12,7 @@ Used for initialization
 settings = {'doc_nr': '%i_%03d'}
 
 
-files = {'start_balance':'balance.yaml',
+files = {'balance':'balance.yaml',
          'transactions':'transactions.yaml',
          'settings':'settings.yaml',
          'invoices':'invoices.yaml',
@@ -25,10 +25,7 @@ folders = {'INS':'invoices',
 
 account_names = ['Assets', 
                   'Assets.Bank',
-                  'Liabilities',
-                  'Ext.Clients',
-                  'Ext.Suppliers',
-                  'Ext']
+                  'Liabilities']
 
 accounts = dict(zip(account_names, len(account_names)*[0.0]))
 

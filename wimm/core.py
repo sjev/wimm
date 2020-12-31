@@ -49,7 +49,7 @@ def parse_account(s):
 def load_data(name, db_path):
     """ load data from yaml """
     import wimm.structure as structure
-    fcns = {'start_balance': load_start_balance,
+    fcns = {'balance': load_start_balance,
             'transactions': Transactions.from_yaml,
             'invoices': Invoices.from_yaml}
 
