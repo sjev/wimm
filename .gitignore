@@ -1,3 +1,6 @@
+# temp files
+*.swp
+
 # specific files
 transactions.yaml
 accounts.yaml

@@ -1,0 +1,8 @@
+site_name: WIMM ( Where Is My Money)
+theme: readthedocs
+
+markdown_extensions:
+    - admonition
+
+nav:
+    - 'README.md'
