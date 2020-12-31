@@ -54,6 +54,14 @@
                 <ul class="current">
                     <li class="toctree-l1 current"><a class="reference internal current" href="./">Quick start</a>
     <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#set-environment-variable">Set environment variable</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#init-database">Init database</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#displaying-balance">Displaying balance</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#adding-invoices">Adding invoices</a>
+    </li>
     </ul>
                     </li>
                 </ul>
@@ -90,6 +98,72 @@
             <div class="section">
               
                 <h1 id="quick-start">Quick start</h1>
+<h2 id="set-environment-variable">Set environment variable</h2>
+<p>WIMM needs to know where its database is located. This path id defined in <code>WIMM_PATH</code> environment variable.
+Most convinient way to set the environment variable is to add a line to <code>.bashrc</code> file: </p>
+<pre><code class="language-bash">export WIMM_PATH=/home/user/accounting
+</code></pre>
+<p>But you can also just set the variable for current working dir like this: <code>WIMM_PATH="$PWD"</code></p>
+<p>You can check the configuration with <code>wimm info</code>:</p>
+<pre><code class="language-none">$ wimm info
+Data location: /home/jev/temp
+Hashed files: 0
+</code></pre>
+<h2 id="init-database">Init database</h2>
+<p><code>wimm init files</code> will create the necessary files and folders.</p>
+<h2 id="displaying-balance">Displaying balance</h2>
+<p>After initialisation you shold be able to view current balance:</p>
+<pre><code class="language-none">$ wimm show balance
+----------Balance-----------
+Assets               0.0
+Assets.Bank          0.0
+Assets.bank       1100.0
+Expenses            50.0
+Ext.Bob          -1000.0
+INR.00_000           0.0
+Liabilities       -150.0
+tax.to_pay           0.0
+tax.to_receive       0.0
+----------------------------
+SUM: 0.00
+</code></pre>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>WIMM treats invoices as separate accounts. account value of 0 indicates that the corresponding invoice has been payed.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>use <code>--nozeros</code> option to hide accounts with zero values
+use <code>--depth</code> option to collapse accounts to a desired level</p>
+</div>
+<pre><code class="language-none">$ wimm show balance --nozeros --depth 1
+----------Balance-----------
+Assets         1100.00
+Expenses         50.00
+Ext           -1000.00
+INR            -142.40
+Liabilities    -150.00
+tax              24.71
+----------------------------
+SUM: -117.69
+</code></pre>
+<div class="admonition attention">
+<p class="admonition-title">Attention</p>
+<p>The account names on the balance are currently generated from transactions. This means that <em>every</em> account mentioned will appear on the balance.
+It would be better to show only the accounts defined in <code>balance.yaml</code>.  This behavior is planned to be implemented later.</p>
+</div>
+<h2 id="adding-invoices">Adding invoices</h2>
+<p>Invoices can be added with <code>wimm add invoce FILENAME</code>. The invoice should be a pdf file. 
+A dialog will be presented to guide you through the addition process. WIMM will also try to open the pdf file in system viewer.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Multiple invoices can be added with a wildcard pattern <code>*.pdf</code>. Other patterns are also possible. </p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Files added to the database are tracked by their md5 hashses. The hashes are stored in <code>.wimm/hashes</code> file. The files with hashes present in the database <em>will be skipped</em>.
+<code>hashes</code> file may be deleted and recreated with <code>wimm init hash hash</code> command</p>
+</div>
               
             </div>
           </div>
