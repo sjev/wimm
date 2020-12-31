@@ -12,7 +12,7 @@ Used for initialization
 settings = {'doc_nr': '%i_%03d'}
 
 
-files = {'start_balance':'start_balance.yaml',
+files = {'start_balance':'balance.yaml',
          'transactions':'transactions.yaml',
          'settings':'settings.yaml',
          'invoices':'invoices.yaml',

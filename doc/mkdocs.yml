@@ -5,4 +5,5 @@ markdown_extensions:
     - admonition
 
 nav:
-    - 'README.md'
+    - 'index.md'
+    - 'quick_start.md'

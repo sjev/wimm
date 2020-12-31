@@ -9,7 +9,7 @@
 * yaml file format
 * support for invoice management
 * import of bank statements 
-
+* tax (VAT or BTW in Dutch)
 
 
 ## Why WIMM 
@@ -20,5 +20,9 @@ Well, there are many great advantages of of *plain text accounting*, to name a f
 * data is human readable/editable
 * plays nicely with version control systems
 * new tools/scripts are easy to build
+
+However, I could not find a piece of software that would sufficiently automate my workflow, especially around invoce and tax management. So WIMM was born.
+
+## How it works
 
 
