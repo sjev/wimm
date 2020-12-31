@@ -65,8 +65,8 @@ Ext: 0.0
 `invoices.yaml` - overview of sent and received invoices. 
 
 !!! note
-	invoices that are sent have **positive amounts**.  These have `INS.YY_nnn` id
-	received invoices have **negative amounts** indicating debt. The ids are `INR.YY_nnn` 
+	invoices that are sent have **positive amounts**.  These have id in a form `INS.YY_nnn` (INS stands for 'INvoice Sent').
+	Received invoices have **negative amounts** indicating debt. The ids are `INR.YY_nnn` 
 
 ``` yaml
 - amount: 0
