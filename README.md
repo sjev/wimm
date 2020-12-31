@@ -1,3 +1,5 @@
+
+
 # Introduction 
 
 ## What is WIMM
@@ -22,6 +24,11 @@ Well, there are many great advantages of of *plain text accounting*, to name a f
 * new tools/scripts are easy to build
 
 However, I could not find a piece of software that would sufficiently automate my workflow, especially around invoce and tax management. So WIMM was born.
+
+## Documentation
+
+see [WIMM documentation](https://sjev.github.io/wimm/)
+
 
 ## How it works
 
