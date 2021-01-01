@@ -101,7 +101,7 @@ def init_hash():
 
 
 @click.command('statement')
-@click.option('--bank', default='KNAB', help='type of bank statement')
+@click.argument('bank')
 @click.option('--account', default=None, help='account name to fill in')
 @click.argument('data_file')
 def import_statement(bank, data_file, account):
@@ -114,7 +114,7 @@ def import_statement(bank, data_file, account):
 
     if bank not in loaders.keys():
         echo(
-            f'Import for {bank} not supported.\nSupported options are {loaders.keys()}')
+            f'Import for {bank} not supported.\nSupported options are {list(loaders.keys())}')
         return
 
     echo(f'importing {data_file}')
