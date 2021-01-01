@@ -37,8 +37,11 @@ def hasher():
 @click.command()
 def info():
     """ show status """
-    echo(f'Data location: {PATH}')
+    echo(f'PATH: {PATH}')
     echo('Hashed files: %i' % len(hasher().hashes))
+    echo('-----settings-----')
+    for k, v in wimm.config.items():
+        print(f'{k}: {v}')
 
 
 @click.group()
@@ -166,12 +169,6 @@ def show_invoices():
     print(invoices().to_df().to_string())
 
 
-@click.command('config')
-def show_config():
-    """ show wimm configuration """
-    for k, v in wimm.config.items():
-        print(f'{k}:{v}')
-
 @click.command('invoice')
 @click.argument("pattern")
 def add_invoice(pattern):
@@ -242,7 +239,6 @@ import_data.add_command(import_statement)
 show.add_command(show_balance)
 show.add_command(show_transactions)
 show.add_command(show_invoices)
-show.add_command(show_config)
 
 init.add_command(init_files)
 init.add_command(init_hash)
