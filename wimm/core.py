@@ -262,8 +262,7 @@ class Invoices(ListPlus):
 
     def to_df(self):
         """ convert to DataFrame """
-        records = [inv.to_dict() for inv in self.data]
-        return pd.DataFrame.from_records(records)
+        return pd.DataFrame.from_records(self.data)
 
     def to_accounts(self):
         """ convert to accounts, including taxes """
