@@ -37,7 +37,6 @@ from collections import UserList, UserDict
 import yaml
 import wimm.utils as utils
 import pandas as pd
-from dataclasses import dataclass, asdict, fields, _MISSING_TYPE
 
 
 def parse_account(s):
@@ -196,18 +195,20 @@ class Invoice(UserDict):
     def rest_amount(self):
         return self.amount - self.amount_payed
 
-    def transactions(self):
+    def transaction(self):
         """ return transactions corresponding to an invoice """
         
         keys = ['amount','date','from','to']
         vals = [self.data[key] for key in keys]
-        out = [dict(zip(keys,vals))]
-        
+        return dict(zip(keys,vals))
+    
+    def tax_transaction(self):
+        """ transacton corresponding to taxes """
+        pass 
         
         # if self.data['tax'] > 0:
         #     out.append({'from':'Ext.Taxes', 'to':'MyCompany.tax.to_receive', 'amount':})
         
-        return out
     # def __repr__(self):
     #     return f"Invoice {self['id']} {self.amount}"
 

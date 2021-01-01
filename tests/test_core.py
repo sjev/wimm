@@ -111,12 +111,12 @@ def test_invoices_aux():
     
 def test_invoices_conversion():
     
-    fname = 'data/invoices.yaml'
     invoices = structure.invoices()
     
-    tr = invoices[0].transactions()
+    tr = invoices[0].transaction()
     
-    assert tr[0] == {'amount':0,
+    assert tr == {'amount':0,
                   'date':'2000-12-31',
                   'from':'MyCompany.INR.INR00_000',
                   'to':'Microsoft'}
+    

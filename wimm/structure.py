@@ -9,8 +9,7 @@ Used for initialization and testing
 
 
 
-settings = {'doc_nr': '%i_%03d',
-            'company_name': 'MyCompany',
+settings = {'company_name': 'MyCompany',
             'tax_rate': 0.21}
 
 

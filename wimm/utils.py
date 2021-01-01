@@ -14,6 +14,8 @@ from dataclasses import asdict, is_dataclass
 import re
 
 from wimm import DATE_FMT
+import wimm
+
 
 def tax(amount, rate=0.21):
     return -round(amount-amount/(1+rate), 2)
@@ -40,20 +42,6 @@ def dialog(data_in):
         data_out[key] = new_val
 
     return data_out
-
-
-def get_path():
-    """ get path of database directory """
-
-    var = 'WIMM_PATH'
-    val = os.getenv(var)
-
-    if not val:
-        print(f"environment variable {var} not found. ")
-        import sys
-        sys.exit()
-
-    return Path(val)
 
 
 def validate(s, regex):

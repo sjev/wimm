@@ -80,6 +80,7 @@ def init_files():
     utils.save_yaml(
         PATH / structure.files['transactions'], structure.transactions)
     utils.save_yaml(PATH / structure.files['invoices'], structure.invoices())
+    utils.save_yaml(PATH / structure.files['settings'], structure.settings)
 
     # create folders
     for folder in structure.folders.values():
@@ -165,6 +166,12 @@ def show_invoices():
     print(invoices().to_df().to_string())
 
 
+@click.command('config')
+def show_config():
+    """ show wimm configuration """
+    for k, v in wimm.config.items():
+        print(f'{k}:{v}')
+
 @click.command('invoice')
 @click.argument("pattern")
 def add_invoice(pattern):
@@ -235,6 +242,7 @@ import_data.add_command(import_statement)
 show.add_command(show_balance)
 show.add_command(show_transactions)
 show.add_command(show_invoices)
+show.add_command(show_config)
 
 init.add_command(init_files)
 init.add_command(init_hash)
@@ -253,4 +261,6 @@ if __name__ == "__main__":  # note - name will be wimm.cli in case of terminal c
 
     PATH = list(Path(__file__).parents)[1] / 'tests/data'
 else:
-    PATH = utils.get_path()
+    PATH = wimm.config['path']
+    if not PATH:
+        echo("WARNING: environment variable WIMM_PATH is not set")
