@@ -3,13 +3,15 @@
 """
 
 Definitions for default directories, files etc.
-Used for initialization
+Used for initialization and testing
 
 """
 
 
 
-settings = {'doc_nr': '%i_%03d'}
+settings = {'doc_nr': '%i_%03d',
+            'company_name': 'MyCompany',
+            'tax_rate': 0.21}
 
 
 files = {'balance':'balance.yaml',
@@ -56,7 +58,7 @@ transactions = [ {'date' : '2020-01-01',
 def invoices():
     from wimm.core import Invoice, Invoices
     # create a couple of invoices for testing
-    ids = ['INR.00_000','INR.20_001','INS.20_001','INR.21_001','INR.21_003']
+    ids = ['INR00_000','INR20_001','INS20_001','INR21_001','INR21_003']
     dates = ['2000-12-31','2020-01-01','2020-02-01','2020-02-10','2020-12-05']
     #due_dates = ['2020-01-30','2020-02-15','2020-03-20','2021-01-05']
     amounts = [0, 70,50,25,1000]

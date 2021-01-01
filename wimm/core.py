@@ -174,9 +174,9 @@ class Transactions(ListPlus):
 
 @dataclass
 class Invoice:
-    id: str
-    date: str
-    amount: float
+    id: str = 'INV'
+    date: str = utils.date()
+    amount: float = 0.0
     tax: float = 0
     sender: str = None
     description: str = ''
@@ -185,7 +185,7 @@ class Invoice:
 
     def __post_init__(self):
 
-        utils.validate(self.id, "IN([A-Z]{1}.[0-9]{2}_[0-9]{3})")
+        utils.validate(self.id, "IN([A-Z]{1}[0-9]{2}_[0-9]{3})")
         utils.validate(self.date, "([0-9]{4}-[0-9]{2}-[0-9]{2})")
 
     @classmethod
