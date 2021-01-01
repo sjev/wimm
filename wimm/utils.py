@@ -90,7 +90,7 @@ def save_yaml(yaml_file, data, ask_confirmation=True):
         data.to_yaml(yaml_file)
     except AttributeError:
         with open(yaml_file, 'w') as f:
-            yaml.dump(data, f)
+            yaml.dump(data, f, sort_keys=False)
 
 
 def get_data_mappings(yaml_file='data_mappings.yaml'):

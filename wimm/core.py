@@ -37,7 +37,7 @@ from collections import UserList, UserDict
 import yaml
 import wimm.utils as utils
 import pandas as pd
-
+import wimm
 
 def parse_account(s):
     """ parse entity and account string """
@@ -123,14 +123,18 @@ def parse_bank_statement(self, statement_file, acct_name='Assets.bank', bank='AS
 def balance(transactions, start_balance=None, invoices=None, depth=None):
     """ calculate balance """
 
-    accounts = transactions.process()
+
+    if invoices is not None:
+        accounts = (transactions+invoices.to_transactions()).process()
+    else:
+        accounts = transactions.process()
     
     if start_balance is not None:
         accounts = accounts.add(start_balance, fill_value=0)
 
-    if invoices is not None:
-        inv_acc  = invoices.to_accounts() # convert to series
-        accounts = accounts.add(inv_acc, fill_value=0)
+    # if invoices is not None:
+    #     inv_acc  = invoices.to_accounts() # convert to series
+    #     accounts = accounts.add(inv_acc, fill_value=0)
         
     names = accounts.index.to_list()
 
@@ -151,7 +155,7 @@ class ListPlus(UserList):
         if yaml_file:
             utils.save_yaml(yaml_file, data, ask_confirmation=confirm)
 
-        return yaml.dump(data)
+        return yaml.dump(data,sort_keys=False)
 
     @classmethod
     def from_yaml(cls, yaml_file):
@@ -178,7 +182,7 @@ class Invoice(UserDict):
         super().__init__(*args, **kwargs)
         
         keys = ['id','amount','tax','date','from','to','description','attachment','due_date']
-        vals = [None, 0.0, 0,  None, 'Uncategorized', 'Uncategorized', None, None]
+        vals = [None, 0.0, None,  None, 'Uncategorized', 'Uncategorized', None, None]
         for k,v in zip(keys,vals):
             self.setdefault(k,v)
         
@@ -204,15 +208,23 @@ class Invoice(UserDict):
     
     def tax_transaction(self):
         """ transacton corresponding to taxes """
-        pass 
         
-        # if self.data['tax'] > 0:
-        #     out.append({'from':'Ext.Taxes', 'to':'MyCompany.tax.to_receive', 'amount':})
+        tax = self.data['tax']
         
-    # def __repr__(self):
-    #     return f"Invoice {self['id']} {self.amount}"
-
- 
+        if tax is None:
+            return None
+        
+        out = {'date': self.data['date'], 'amount' : abs(tax)}
+        
+        if tax > 0:
+            out['from'] = wimm.config['tax_external_acct']
+            out['to'] = wimm.config['company_name'] +'.tax.to_receive'
+        elif tax < 0:
+            out['from'] = wimm.config['company_name'] +'.tax.to_pay'
+            out['to'] =  wimm.config['tax_external_acct']
+            
+        return out    
+   
 
 
 class Invoices(ListPlus):
@@ -269,7 +281,20 @@ class Invoices(ListPlus):
     def to_df(self):
         """ convert to DataFrame """
         return pd.DataFrame.from_records(self.data)
-
+    
+    def to_transactions(self):
+        """ convert to transactions """
+        
+        trs = Transactions()
+        for inv in self.data:
+            trs.append(inv.transaction())
+            tax_tr = inv.tax_transaction()
+            if tax_tr:
+                trs.append(tax_tr)
+           
+        return trs
+            
+            
     def to_accounts(self):
         """ convert to accounts, including taxes """
         df =self.to_df()

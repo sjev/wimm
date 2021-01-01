@@ -39,7 +39,7 @@ def info():
     """ show status """
     echo(f'PATH: {PATH}')
     echo('Hashed files: %i' % len(hasher().hashes))
-    echo('-----settings-----')
+    echo('-----config-----')
     for k, v in wimm.config.items():
         print(f'{k}: {v}')
 
@@ -138,7 +138,7 @@ def import_statement(bank, data_file, account):
 
 
 @click.command('balance')
-@click.option('--depth', default=2, help='account depth level to show')
+@click.option('--depth', default=3, help='account depth level to show')
 @click.option('--nozeros', is_flag=True)
 def show_balance(depth, nozeros):
     """ print current balance """
