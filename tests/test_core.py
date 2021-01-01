@@ -83,7 +83,7 @@ def test_invoices_functions():
     invoices = structure.invoices()
     
     inv = invoices.get_by_id('INR00_000')
-    assert inv['sender'] == 'Microsoft'
+    assert inv['to'] == 'Microsoft'
     
     inv = invoices.get_sorted_by('id', reverse=True)[0]
     assert inv['description'] == 'bbb'
@@ -113,3 +113,5 @@ def test_invoices_conversion():
     
     fname = 'data/invoices.yaml'
     invoices = core.Invoices.from_yaml(fname)
+    
+    

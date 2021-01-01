@@ -63,12 +63,13 @@ def invoices():
     #due_dates = ['2020-01-30','2020-02-15','2020-03-20','2021-01-05']
     amounts = [0, 70,50,25,1000]
     taxes = [0,10,20,4.3,12.0]
-    senders = ['Microsoft','Bob','Bob','Alice','Alice']
+    tos = ['Microsoft','Bob','MyCompany.INS.INS20_001','Alice','Alice']
+    froms = ['MyCompany.INR.INR00_000','MyCompany.INR.INR20_001','ClientMax','MyCompany.INR.INR21_001','MyCompany.INR.INR21_003']
     descriptions = ['dummy invoice', 'aaa', 'bbb', 'ccc', 'ddd']
     
-    keys = ['id','date','amount','tax','sender','description','sender']
+    keys = ['id','date','amount','tax','from','to','description']
     invs = Invoices()
-    for vals in zip(ids,dates,amounts,taxes,senders,descriptions):
+    for vals in zip(ids,dates,amounts,taxes,froms,tos,descriptions):
         invs.append(Invoice(dict(zip(keys,vals))))
    
     return invs

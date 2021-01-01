@@ -1,40 +1,27 @@
-- amount: 0
+- amount: 500
   date: '2000-12-31'
   description: dummy invoice
   attachment: null
   due_date: null
   id: INR20_000
-  sender: Microsoft
-  tax: 0
-- amount: -33.28
+  from: MyCompany.INR.INR20_000
+  to: Ext.Microsoft
+  tax: 100
+- amount: 33.28
   date: '2020-01-28'
   description: First invoice
   attachment: invoices_received/sample_invoice.pdf
   due_date: '2020-02-27'
   id: INR20_001
-  sender: AAA
+  from: MyCompany.INR.INR20_001
+  to: Ext.Apple
   tax: 5.78
-- amount: -50.0
-  date: '2020-01-21'
-  description: Second invoice
-  attachment: null
-  due_date: '2020-02-20'
-  id: INR20_002
-  sender: BBB
-  tax: 0.0
-- amount: -166.38
-  date: '2020-03-01'
-  description: One without tax
-  attachment: null
-  due_date: '2020-03-31'
-  id: INR20_003
-  sender: KPN
-  tax: 28.88
 - amount: 5000
   date: '2020-04-01'
   description: My first earnings!
   attachment: null
   due_date: '2020-03-31'
   id: INS20_001
-  sender: my company
+  to: MyCompany.INS.INS20_001
+  from: Ext.CustomerX
   tax: -1200

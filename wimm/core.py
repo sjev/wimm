@@ -202,11 +202,17 @@ class Invoice(UserDict):
     def rest_amount(self):
         return self.amount - self.amount_payed
 
+    def transactions(self):
+        """ return transactions corresponding to an invoice """
+        
+        keys = ['amount','date','from','to']
+        out = [dict(k,self.data[k]) for k in keys]
+        
+
     # def __repr__(self):
     #     return f"Invoice {self['id']} {self.amount}"
 
-    def to_dict(self):
-        return asdict(self)
+ 
 
 
 class Invoices(ListPlus):
