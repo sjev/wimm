@@ -98,8 +98,11 @@ def save_yaml(yaml_file, data, ask_confirmation=True):
         if not overwrite:
             return
 
-    with open(yaml_file, 'w') as f:
-        yaml.dump(data, f)
+    try: 
+        data.to_yaml(yaml_file)
+    except AttributeError:
+        with open(yaml_file, 'w') as f:
+            yaml.dump(data, f)
 
 
 def get_data_mappings(yaml_file='data_mappings.yaml'):
