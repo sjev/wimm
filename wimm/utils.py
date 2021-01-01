@@ -13,7 +13,7 @@ from pathlib import Path
 from dataclasses import asdict, is_dataclass
 import re
 
-DATE_FMT = "%Y-%m-%d"
+from wimm import DATE_FMT
 
 def tax(amount, rate=0.21):
     return -round(amount-amount/(1+rate), 2)

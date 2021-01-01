@@ -18,7 +18,6 @@ import click
 from click import echo
 
 
-
 def start_balance():
     return core.load_data('balance', PATH)
 
@@ -30,15 +29,17 @@ def transactions():
 def invoices():
     return core.load_data('invoices', PATH)
 
+
 def hasher():
     return utils.Hasher(PATH / structure.files['hashes'])
+
 
 @click.command()
 def info():
     """ show status """
     echo(f'Data location: {PATH}')
     echo('Hashed files: %i' % len(hasher().hashes))
-    
+
 
 @click.group()
 @click.version_option(version=wimm.__version__)
@@ -51,6 +52,7 @@ def show():
     """ print reports. Provide an command what to show """
     pass
 
+
 @click.group()
 def add():
     """ add items to database """
@@ -62,10 +64,12 @@ def import_data():
     """ import statements, documents etc. """
     pass
 
+
 @click.group()
 def init():
     """ initialize data, use with caution """
     pass
+
 
 @click.command('files')
 def init_files():
@@ -88,31 +92,44 @@ def init_files():
 @click.command('hash')
 def init_hash():
     """ rebuild stored file hashes """
-    
+
     h = hasher()
     h.delete_hashes()
-    
-    for key in ['INR','INS']:
+
+    for key in ['INR', 'INS']:
         h.add(PATH / structure.folders[key])
-    
+
 
 @click.command('statement')
-@click.option('--bank', default='ASN', help='type of bank statement')
-@click.argument('account_name')
+@click.option('--bank', default='KNAB', help='type of bank statement')
+@click.option('--account', default=None, help='account name to fill in')
 @click.argument('data_file')
-def import_statement(bank, account_name, data_file):
+def import_statement(bank, data_file, account):
     """import bank statement to the end of `transactions.yaml`"""
-    print(f'importing {data_file}')
 
-    raise NotImplementedError('Function is not ready yet. ')
-    if not os.path.exists(data_file):
-        print('ERROR: file not found')
+    import wimm.data_importers as importers
+    import wimm.structure as structure 
+
+    loaders = {'KNAB': importers.knab_import}
+
+    if bank not in loaders.keys():
+        echo(
+            f'Import for {bank} not supported.\nSupported options are {loaders.keys()}')
         return
 
-    # TODO: fix this   
-    transactions = utils.parse_bank_statement(data_file)
+    echo(f'importing {data_file}')
 
-    with open('transactions.yaml', 'a') as f:
+    if not os.path.exists(data_file):
+        echo('ERROR: file not found')
+        return
+
+    if account is None:
+        transactions = loaders[bank](data_file)
+    else:
+        transactions = loaders[bank](data_file, account)
+
+    
+    with (PATH / structure.files['transactions']).open('a') as f:
         f.write(f'\n# ---IMPORT--- at {utils.timestamp()} file: {data_file}\n')
         f.write(transactions.to_yaml())
 
@@ -120,11 +137,12 @@ def import_statement(bank, account_name, data_file):
 @click.command('balance')
 @click.option('--depth', default=2, help='account depth level to show')
 @click.option('--nozeros', is_flag=True)
-def show_balance(depth,nozeros):
+def show_balance(depth, nozeros):
     """ print current balance """
 
-    balance = core.balance(transactions(), start_balance(), invoices(), depth=depth)
-    
+    balance = core.balance(
+        transactions(), start_balance(), invoices(), depth=depth)
+
     if nozeros:
         balance = balance[balance != 0]
 
@@ -141,7 +159,6 @@ def show_transactions():
     print(transactions().to_yaml())
 
 
-
 @click.command('invoices')
 def show_invoices():
     """ show invoices """
@@ -153,61 +170,65 @@ def show_invoices():
 @click.argument("pattern")
 def add_invoice(pattern):
     """ add invoice(s). For multiple files provide a search pattern, like *.pdf """
-    
+
     if pattern[0] == '*':
         files = [p.absolute() for p in Path('.').glob(pattern)]
-        files = sorted(files, key=os.path.getmtime) # sort on modification times
+        # sort on modification times
+        files = sorted(files, key=os.path.getmtime)
         echo(f'Adding {len(files)} files')
     else:
         files = [Path(pattern).absolute()]
-        
-    
+
     for src_file in files:
         if not src_file.exists():
             echo('File not found')
             continue
-        
+
         hsh = hasher()
         if hsh.is_present(src_file):
             echo(f'{src_file} is already in database.')
             continue
-        
-        
-        import subprocess, sys
+
+        import subprocess
+        import sys
         devnull = open(os.devnull, 'w')
-        opener ="open" if sys.platform == "darwin" else "xdg-open"
-        subprocess.call([opener, src_file.as_posix()],stdout=devnull, stderr=devnull)
-        
+        opener = "open" if sys.platform == "darwin" else "xdg-open"
+        subprocess.call([opener, src_file.as_posix()],
+                        stdout=devnull, stderr=devnull)
+
         echo('Adding invoce. negative amount = incoming invoice')
-        
+
         data = {}
-        
+
         data['amount'] = click.prompt('amount', type=float)
-        
+
         prefix = 'INS' if data['amount'] > 0 else 'INR'
-        data['id'] = click.prompt('id',invoices().get_next_id(prefix))
-        data['tax'] = click.prompt('tax',utils.tax(data['amount']))
-        
+        data['id'] = click.prompt('id', invoices().get_next_id(prefix))
+        data['tax'] = click.prompt('tax', utils.tax(data['amount']))
+
         if prefix == 'INR':
-            data['sender']  = click.prompt('sender')
-            
+            data['sender'] = click.prompt('sender')
+
         data['description'] = click.prompt('description')
         data['date'] = click.prompt('date', utils.date())
-        data['due_date'] = click.prompt('due_date', utils.date_offset(data['date'],30))
-        
-        dest_file = PATH / structure.folders[prefix] / (data['id']+'_'+src_file.name.replace(' ','_'))
+        data['due_date'] = click.prompt(
+            'due_date', utils.date_offset(data['date'], 30))
+
+        dest_file = PATH / \
+            structure.folders[prefix] / \
+            (data['id']+'_'+src_file.name.replace(' ', '_'))
         echo('copying file to:'+str(dest_file))
-        shutil.copy(src_file,dest_file)
+        shutil.copy(src_file, dest_file)
         hsh.add(dest_file)
-        
+
         data['documents'] = dest_file.relative_to(PATH).as_posix()
-        
+
         invoices_new = core.Invoices()
-        invoices_new.append(core.Invoice(**data))    
-        
-        
-        with open(PATH / structure.files['invoices'],'a') as f:
+        invoices_new.append(core.Invoice(**data))
+
+        with open(PATH / structure.files['invoices'], 'a') as f:
             f.write(invoices_new.to_yaml())
+
 
 # build groups
 import_data.add_command(import_statement)
@@ -229,12 +250,8 @@ cli.add_command(info)
 cli.add_command(add)
 
 
-
-
-
-
 if __name__ == "__main__":  # note - name will be wimm.cli in case of terminal cmd
-    
+
     PATH = list(Path(__file__).parents)[1] / 'tests/data'
 else:
-    PATH = utils.get_path() 
+    PATH = utils.get_path()

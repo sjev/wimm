@@ -31,12 +31,12 @@ accounts = dict(zip(account_names, len(account_names)*[0.0]))
 
 transactions = [ {'date' : '2020-01-01',
                'from' : 'Ext.Bob',
-               'to' : 'Assets.bank',
+               'to' : 'Assets.Bank',
                'amount' : 1000.0,
                'description' : 'Customer paid invoice'},
                 
                 {'date' : '2020-01-02',
-               'from' : 'Assets.bank',
+               'from' : 'Assets.Bank',
                'to' : 'Expenses',
                'amount' : 50.0,
                'description' : 'bought some pens',
@@ -44,7 +44,7 @@ transactions = [ {'date' : '2020-01-01',
                 
                 {'date' : '2020-01-03',
                'from' : 'Liabilities',
-               'to' : 'Assets.bank',
+               'to' : 'Assets.Bank',
                'amount' : 150.0,
                'description' : 'Borrowed some money from Bob'    } ]
 
