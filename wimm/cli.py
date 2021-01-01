@@ -79,8 +79,7 @@ def init_files():
     utils.save_yaml(PATH / structure.files['balance'], structure.accounts)
     utils.save_yaml(
         PATH / structure.files['transactions'], structure.transactions)
-    core.Invoices([structure.invoices()[0]]).to_yaml(
-        PATH / structure.files['invoices'])
+    utils.save_yaml(PATH / structure.files['invoices'], structure.invoices())
 
     # create folders
     for folder in structure.folders.values():

@@ -65,7 +65,11 @@ def invoices():
     taxes = [0,10,20,4.3,12.0]
     senders = ['Microsoft','Bob','Bob','Alice','Alice']
     descriptions = ['dummy invoice', 'aaa', 'bbb', 'ccc', 'ddd']
-    objects = [Invoice(*vals) for vals in zip(ids,dates,amounts,taxes,senders,descriptions)]
-    return Invoices(objects)
     
+    keys = ['id','date','amount','tax','sender','description','sender']
+    invs = Invoices()
+    for vals in zip(ids,dates,amounts,taxes,senders,descriptions):
+        invs.append(Invoice(dict(zip(keys,vals))))
+   
+    return invs
 

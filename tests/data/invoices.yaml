@@ -1,40 +1,40 @@
 - amount: 0
   date: '2000-12-31'
   description: dummy invoice
-  documents: null
+  attachment: null
   due_date: null
-  id: INR.20_000
+  id: INR20_000
   sender: Microsoft
   tax: 0
 - amount: -33.28
   date: '2020-01-28'
   description: First invoice
-  documents: invoices_received/sample_invoice.pdf
+  attachment: invoices_received/sample_invoice.pdf
   due_date: '2020-02-27'
-  id: INR.20_001
+  id: INR20_001
   sender: AAA
   tax: 5.78
 - amount: -50.0
   date: '2020-01-21'
   description: Second invoice
-  documents: null
+  attachment: null
   due_date: '2020-02-20'
-  id: INR.20_002
+  id: INR20_002
   sender: BBB
   tax: 0.0
 - amount: -166.38
   date: '2020-03-01'
   description: One without tax
-  documents: null
+  attachment: null
   due_date: '2020-03-31'
-  id: INR.20_003
+  id: INR20_003
   sender: KPN
   tax: 28.88
 - amount: 5000
   date: '2020-04-01'
   description: My first earnings!
-  documents: null
+  attachment: null
   due_date: '2020-03-31'
-  id: INS.20_001
+  id: INS20_001
   sender: my company
   tax: -1200

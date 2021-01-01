@@ -33,7 +33,7 @@ A tranaction may be taxed (with a VAT for example)
 
 
 """
-from collections import UserList
+from collections import UserList, UserDict
 import yaml
 import wimm.utils as utils
 import pandas as pd
@@ -172,21 +172,18 @@ class Transactions(ListPlus):
         return tr.groupby(['to']).amount.sum().subtract(tr.groupby(['from']).amount.sum(), fill_value=0)
 
 
-@dataclass
-class Invoice:
-    id: str = 'INV'
-    date: str = utils.date()
-    amount: float = 0.0
-    tax: float = 0
-    sender: str = None
-    description: str = ''
-    due_date: str = None
-    documents: str = None
 
-    def __post_init__(self):
+class Invoice(UserDict):
+     
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+  
+        
 
-        utils.validate(self.id, "IN([A-Z]{1}[0-9]{2}_[0-9]{3})")
-        utils.validate(self.date, "([0-9]{4}-[0-9]{2}-[0-9]{2})")
+    def validate(self):
+
+        utils.validate(self.data['id'], "IN([A-Z]{1}[0-9]{2}_[0-9]{3})")
+        utils.validate(self.data['date'], "([0-9]{4}-[0-9]{2}-[0-9]{2})")
 
     @classmethod
     def fields(cls):
@@ -205,8 +202,8 @@ class Invoice:
     def rest_amount(self):
         return self.amount - self.amount_payed
 
-    def __repr__(self):
-        return f"Invoice {self.id} {self.amount}"
+    # def __repr__(self):
+    #     return f"Invoice {self['id']} {self.amount}"
 
     def to_dict(self):
         return asdict(self)
@@ -235,13 +232,13 @@ class Invoices(ListPlus):
             n = len(pat)
             matches = []
             for inv in self.data:
-                if inv.id[:n] == pat:
+                if inv['id'][:n] == pat:
                     matches.append(inv)
             return Invoices(matches).get_sorted_by('id')
 
         else:
             for inv in self.data:  # single matching
-                if inv.id == id:
+                if inv['id'] == id:
                     return inv
 
         raise KeyError('id not found')
@@ -250,7 +247,7 @@ class Invoices(ListPlus):
         """ get next available invoice number for a prefix """
 
         try:
-            id = self.get_by_id(prefix+'*')[-1].id
+            id = self.get_by_id(prefix+'*')[-1]['id']
         except IndexError:  # prefix not found, make new one
             return f"{prefix}{utils.timestamp('%y')}_001"
 
@@ -260,7 +257,7 @@ class Invoices(ListPlus):
     def get_sorted_by(self, key, reverse=False):
 
         return sorted(self,
-                      key=lambda x: getattr(x, key),
+                      key=lambda x: x[key],
                       reverse=reverse)
 
     def to_df(self):
