@@ -177,7 +177,11 @@ class Invoice(UserDict):
      
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-  
+        
+        keys = ['id','amount','tax','date','from','to','description','attachment','due_date']
+        vals = [None, 0.0, 0,  None, 'Uncategorized', 'Uncategorized', None, None]
+        for k,v in zip(keys,vals):
+            self.setdefault(k,v)
         
 
     def validate(self):
@@ -185,19 +189,9 @@ class Invoice(UserDict):
         utils.validate(self.data['id'], "IN([A-Z]{1}[0-9]{2}_[0-9]{3})")
         utils.validate(self.data['date'], "([0-9]{4}-[0-9]{2}-[0-9]{2})")
 
-    @classmethod
-    def fields(cls):
-        """ return class fields in a form {field_name:default_val} """
-
-        out = {}
-        for f in fields(cls):
-            out[f.name] = f.default if not isinstance(
-                f.default, _MISSING_TYPE) else None
-
-        return out
-
+  
     def to_yaml(self):
-        return yaml.dump(self.to_dict())
+        return yaml.dump(self.data, sort_keys=False)
 
     def rest_amount(self):
         return self.amount - self.amount_payed
@@ -206,9 +200,14 @@ class Invoice(UserDict):
         """ return transactions corresponding to an invoice """
         
         keys = ['amount','date','from','to']
-        out = [dict(k,self.data[k]) for k in keys]
+        vals = [self.data[key] for key in keys]
+        out = [dict(zip(keys,vals))]
         
-
+        
+        # if self.data['tax'] > 0:
+        #     out.append({'from':'Ext.Taxes', 'to':'MyCompany.tax.to_receive', 'amount':})
+        
+        return out
     # def __repr__(self):
     #     return f"Invoice {self['id']} {self.amount}"
 
