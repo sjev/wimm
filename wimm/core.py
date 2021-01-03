@@ -124,10 +124,8 @@ def balance(transactions, start_balance=None, invoices=None, depth=None):
     """ calculate balance """
 
 
-    if invoices is not None:
-        accounts = (transactions+invoices.to_transactions()).process()
-    else:
-        accounts = transactions.process()
+
+    accounts = transactions.process()
     
     if start_balance is not None:
         accounts = accounts.add(start_balance, fill_value=0)
@@ -181,50 +179,70 @@ class Invoice(UserDict):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        keys = ['id','amount','tax','date','from','to','description','attachment','due_date']
-        vals = [None, 0.0, None,  None, 'Uncategorized', 'Uncategorized', None, None]
+        keys = ['id','amount','tax','date','from','to','description','attachment','due_date','ext_name']
+        vals = ['INV00_000', 0.0, None,  None, 'Uncategorized', 'Uncategorized', None, None, None,'ext_company_name']
         for k,v in zip(keys,vals):
             self.setdefault(k,v)
         
+    def __getattr__(self,name):
+        if name in self.data:
+            return self.data[name]
+        else:
+            raise AttributeError(name)
+         
+    @property
+    def prefix(self):
+        return self['id'][:3]
 
     def validate(self):
 
         utils.validate(self.data['id'], "IN([A-Z]{1}[0-9]{2}_[0-9]{3})")
         utils.validate(self.data['date'], "([0-9]{4}-[0-9]{2}-[0-9]{2})")
+        
+    def set_accounts(self, accounts = None):
+        
+        if accounts is None:
+            params = { 'invoice_id':self.id, 'ext_name':  self.ext_name}
+            accounts = utils.invoice_accounts(self.prefix, params, 'invoice_accounts')
+        
+        self.data['from'] = accounts['from']
+        self.data['to'] = accounts['to']
+             
 
-  
+    def transactions(self):
+        """ return ivoice transactions as a list """
+        
+        trs = Transactions()
+        
+        # ----- invoice transaction
+               
+        trs.append({'date':self.date,
+                    'description': 'Invoice '+self.id,
+                    'amount': self.amount,
+                    'from': self['from'],
+                    'to':self['to']})
+        
+        # ----- tax transaction
+        if self.tax:
+            params = { 'invoice_id':self.id, 'ext_name':  self.ext_name}
+            accounts = utils.invoice_accounts(self.prefix, params, 'tax_accounts')
+            
+            trs.append({'date':self.date,
+                        'description': 'Tax for invoice '+self.id,
+                        'amount': self.tax,
+                        **accounts})
+        
+    
+        return trs
+
     def to_yaml(self):
         return yaml.dump(self.data, sort_keys=False)
 
     def rest_amount(self):
         return self.amount - self.amount_payed
 
-    def transaction(self):
-        """ return transactions corresponding to an invoice """
-        
-        keys = ['amount','date','from','to']
-        vals = [self.data[key] for key in keys]
-        return dict(zip(keys,vals))
-    
-    def tax_transaction(self):
-        """ transacton corresponding to taxes """
-        
-        tax = self.data['tax']
-        
-        if tax is None:
-            return None
-        
-        out = {'date': self.data['date'], 'amount' : abs(tax)}
-        
-        if tax > 0:
-            out['from'] = wimm.settings['tax_external_acct']
-            out['to'] = wimm.settings['company_name'] +'.tax.to_receive'
-        elif tax < 0:
-            out['from'] = wimm.settings['company_name'] +'.tax.to_pay'
-            out['to'] =  wimm.settings['tax_external_acct']
-            
-        return out    
-   
+    def __repr__(self):
+        return f"{self.id} amount:{self.amount:<10}  {self['from']} -->  {self.to}"
 
 
 class Invoices(ListPlus):
@@ -287,10 +305,7 @@ class Invoices(ListPlus):
         
         trs = Transactions()
         for inv in self.data:
-            trs.append(inv.transaction())
-            tax_tr = inv.tax_transaction()
-            if tax_tr:
-                trs.append(tax_tr)
+            trs += inv.transactions()
            
         return trs
             

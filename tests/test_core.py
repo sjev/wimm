@@ -18,6 +18,8 @@ from wimm import core
 import wimm.structure as structure
 import wimm.utils as utils
 
+wimm.settings = structure.settings
+
 # create temp dir
 if not os.path.exists('tmp'):
     os.mkdir('tmp')
@@ -77,7 +79,8 @@ def test_invoice_id():
     with pytest.raises(ValueError):
         inv = core.Invoice(id='INR20-0001', date="2020-01-01", amount=10)
         inv.validate()
-    
+        
+        
     
 def test_invoices_functions():
     
@@ -110,22 +113,23 @@ def test_invoices_aux():
     assert invoices.get_next_id('INR') == "INR21_004"
     assert invoices.get_next_id('INS') == "INS20_002"
     
-def test_invoices_conversion():
-    
-    invoices = structure.invoices()
-    
-    tr = invoices[0].transaction()
-    
-    assert tr == {'amount':0,
-                  'date':'2000-12-31',
-                  'from':'MyCompany.INR.INR00_000',
-                  'to':'Microsoft'}
     
 def test_invoice_accounts():
     """ test correct formatting for 'from' and 'to' invoice names """
     
     
-    wimm.settings = structure.settings
+    inv = core.Invoice(id="INR_000", tax = 10, ext_name = 'CorpX')
+    inv.set_accounts()
+    trs = inv.transactions()
+    
+    tr = trs[0]
+    assert tr['to'] == 'Out.CorpX'
+    assert tr['from'] == 'MyCompany.INR.INR_000'
+   
+    tr = trs[1]
+    assert tr['to'] == 'MyCompany.tax.to_receive'
+    assert tr['from'] == 'Taxes'
+    
     
     prefix = 'FOO'
     params = { 'invoice_id':'INV_000', 'ext_name':'ext_name' }
@@ -136,8 +140,6 @@ def test_invoice_accounts():
     prefix = 'INR'
     res = utils.invoice_accounts(prefix, params)
     
-    assert res == {'to':'Out.ext_name',
-                   'from': 'MyCompany.INR.INV_000'}
     
     prefix = 'INS'
     res = utils.invoice_accounts(prefix, params)

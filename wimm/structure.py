@@ -18,6 +18,12 @@ settings = {'company_name': 'MyCompany',
                                         'from':'{company_name}.INR.{invoice_id}'},
                                   'INS': {'to':'{company_name}.INS.{invoice_id}',
                                          'from':'In.{ext_name}'},
+                                },
+            'tax_accounts':  {
+                                  'INR': {'from':'Taxes',
+                                          'to':'{company_name}.tax.to_receive'},
+                                  'INS': {'to':'Taxes',
+                                         'from':'{company_name}.tax.to_pay'},
                                 }
             }
 

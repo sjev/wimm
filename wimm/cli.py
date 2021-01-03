@@ -179,13 +179,24 @@ def show_transactions():
 def show_invoices():
     """ show invoices """
 
-    print(invoices().to_df().to_string())
-
+    for inv in invoices():
+        print(inv)
+   
 
 @click.command('invoice')
+@click.argument('prefix')
 @click.argument("pattern")
-def add_invoice(pattern):
-    """ add invoice(s). For multiple files provide a search pattern, like *.pdf """
+@click.option("--no_hash", is_flag=True, help = "Do not check if file is already in database")
+def add_invoice(prefix, pattern, no_hash):
+    """ add invoice(s).  
+    
+    \b
+    PREFIX invoice prefix, 3 characters (INR,INS etc.)
+    PATTERN filename or a search pattern, like *.pdf
+    
+    """
+    import subprocess
+    import sys
 
     if pattern[0] == '*':
         files = [p.absolute() for p in Path('.').glob(pattern)]
@@ -200,50 +211,56 @@ def add_invoice(pattern):
             echo('File not found')
             continue
 
-        hsh = hasher()
-        if hsh.is_present(src_file):
-            echo(f'{src_file} is already in database.')
-            continue
+        if not no_hash:
+            hsh = hasher()
+            if hsh.is_present(src_file):
+                echo(f'{src_file} is already in database.')
+                continue
 
-        import subprocess
-        import sys
+        
         devnull = open(os.devnull, 'w')
         opener = "open" if sys.platform == "darwin" else "xdg-open"
         subprocess.call([opener, src_file.as_posix()],
                         stdout=devnull, stderr=devnull)
 
-        echo('Adding invoce. negative amount = incoming invoice')
 
-        data = {}
+        inv = core.Invoice()
 
-        data['amount'] = click.prompt('amount', type=float)
+        inv['amount'] = click.prompt('amount', type=float)
 
-        prefix = 'INS' if data['amount'] > 0 else 'INR'
-        data['id'] = click.prompt('id', invoices().get_next_id(prefix))
-        data['tax'] = click.prompt('tax', utils.tax(data['amount']))
+        inv['id'] = click.prompt('id', invoices().get_next_id(prefix))
+        inv['tax'] = click.prompt('tax', utils.tax(inv['amount']))
 
-        if prefix == 'INR':
-            data['sender'] = click.prompt('sender')
+        inv['ext_name'] = click.prompt('ext_company_name')
+        
+        inv.set_accounts()
+        inv['from'] = click.prompt('from acct', inv['from'])
+        inv['to'] = click.prompt('to acct', inv['to'])
 
-        data['description'] = click.prompt('description')
-        data['date'] = click.prompt('date', utils.date())
-        data['due_date'] = click.prompt(
-            'due_date', utils.date_offset(data['date'], 30))
+        inv['description'] = click.prompt('description')
+        inv['date'] = click.prompt('date', utils.date())
+        inv['due_date'] = click.prompt(
+            'due_date', utils.date_offset(inv['date'], 30))
 
         dest_file = PATH / \
             structure.folders[prefix] / \
-            (data['id']+'_'+src_file.name.replace(' ', '_'))
+            (inv['id']+'_'+src_file.name.replace(' ', '_'))
         echo('copying file to:'+str(dest_file))
         shutil.copy(src_file, dest_file)
-        hsh.add(dest_file)
+        
+        if not no_hash:
+            hsh.add(dest_file)
 
-        data['documents'] = dest_file.relative_to(PATH).as_posix()
+        inv['attachment'] = dest_file.relative_to(PATH).as_posix()
 
         invoices_new = core.Invoices()
-        invoices_new.append(core.Invoice(**data))
+        invoices_new.append(inv)
 
         with open(PATH / structure.files['invoices'], 'a') as f:
             f.write(invoices_new.to_yaml())
+            
+        with (PATH / structure.files['transactions']).open('a') as f:
+            f.write(inv.transactions().to_yaml())
 
 
 # build groups

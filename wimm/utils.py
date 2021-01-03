@@ -18,7 +18,7 @@ import wimm
 
 
 def tax(amount, rate=0.21):
-    return -round(amount-amount/(1+rate), 2)
+    return round(amount-amount/(1+rate), 2)
 
 
 def dialog(data_in):
@@ -243,14 +243,14 @@ def names_to_labels(names, depth = 1, sep='.'):
         labels.append('.'.join(fields[:depth]) if len(fields) >= depth else name)
     return labels
 
-def invoice_accounts(prefix, params):
+def invoice_accounts(prefix, params, key='invoice_accounts'):
     """ 
     helper for invoice accounts. 
     
     Returns: {'from': acct, 'to': acct }
     """
     
-    accs = wimm.settings['invoice_accounts']
+    accs = wimm.settings[key]
     
     if prefix not in accs:
         return {'from':'Uncategorized', 'to':'Uncategorized'}
