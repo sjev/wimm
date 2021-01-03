@@ -44,6 +44,17 @@ account_names = ['Assets',
 
 accounts = dict(zip(account_names, len(account_names)*[0.0]))
 
+transaction = {'date': '2020-01-01',
+               'description': 'example transaction',
+               'transfers': 
+                     {'AAA': 32, 'BBB':-30, 'CCC': None}}
+
+v1_transaction = {'date' : '2020-01-01',
+               'from' : 'Ext.Bob',
+               'to' : 'Assets.Bank',
+               'amount' : 1000.0,
+               'description' : 'Customer paid invoice'}
+
 transactions = [ {'date' : '2020-01-01',
                'from' : 'Ext.Bob',
                'to' : 'Assets.Bank',

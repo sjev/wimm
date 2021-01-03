@@ -31,10 +31,19 @@ def test_parser():
     
     assert res == ['Equity','bank','savings']
     
-
+def test_transaction():
     
-    
+    tr = core.Transaction.from_dict(structure.transaction)    
 
+    assert tr.date == '2020-01-01'
+    assert tr.transfers['CCC'] == -2
+    
+def test_transaction_v1():
+
+    tr = core.Transaction.from_v1(structure.v1_transaction)
+    assert tr.date == structure.v1_transaction['date']
+    assert tr.transfers['Ext.Bob'] == -1000
+    assert tr.transfers['Assets.Bank'] == 1000
     
 def test_transactions_roundtrip():
     

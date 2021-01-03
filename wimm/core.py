@@ -38,6 +38,7 @@ import yaml
 import wimm.utils as utils
 import pandas as pd
 import wimm
+from dataclasses import dataclass, asdict
 
 def parse_account(s):
     """ parse entity and account string """
@@ -162,6 +163,49 @@ class ListPlus(UserList):
         data = yaml.load(open(yaml_file), Loader=yaml.SafeLoader)
 
         return cls(data)
+
+@dataclass 
+class Transaction:
+    date: str
+    description: str
+    transfers : dict 
+    labels: str = None
+        
+    
+    def __post_init__(self):
+        
+        total = 0
+        missing = None
+        for k,v in self.transfers.items():
+            if not v:
+                if missing is None:
+                    missing = k
+                else:
+                    raise ValueError('More than one entry is missing')
+            else:
+                total += v
+        self.transfers[missing] = -total
+    
+    @classmethod
+    def from_dict(cls,d):
+        return cls(**d)
+    
+    def to_dict(self):
+        """ save to dict dropping None values """
+        return { k:v for k,v in asdict(self).items() if v is not None}
+    
+    @classmethod
+    def from_v1(cls, tr):
+        """ create from old (v1) dict type """
+    
+        
+        d = {'date':tr['date'],
+             'description':tr['description'],
+             'transfers': {tr['from'] : -tr['amount'],
+                           tr['to'] : tr['amount']}
+             }
+        return cls(**d)
+
 
 
 class Transactions(ListPlus):
