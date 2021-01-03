@@ -204,9 +204,12 @@ class Transaction:
     def from_dict(cls, d):
         return cls(**d)
 
-    def to_dict(self):
-        """ save to dict dropping None values """
-        return {k: v for k, v in asdict(self).items() if v is not None}
+    def to_dict(self, compact=False):
+        """ save to dict (dropping None values if `compact` is True) """
+        if compact:
+            return {k: v for k, v in asdict(self).items() if v is not None}
+        else:
+            return asdict(self)
 
     @classmethod
     def from_v1(cls, tr):
