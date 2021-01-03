@@ -11,8 +11,6 @@ Used for initialization and testing
 
 settings = {'company_name': 'MyCompany',
             'tax_rate': 0.21,
-            'tax_external_acct' : 'Belastingdienst',
-            'tax_internal_acct' : 'BTW',
             'invoice_accounts':  {
                                   'INR': {'to':'Out.{ext_name}',
                                         'from':'{company_name}.INR.{invoice_id}'},
@@ -35,8 +33,8 @@ files = {'balance':'balance.yaml',
          'invoices':'invoices.yaml',
          'hashes': '.wimm/hashes'}
 
-folders = {'INS':'invoices', 
-           'INR':'invoices',
+folders = {'INS':'documents', 
+           'INR':'documents',
            'WIMM':'.wimm'}
 
 
@@ -77,7 +75,7 @@ def invoices():
     dates = ['2000-12-31','2020-01-01','2020-02-01','2020-02-10','2020-12-05']
     #due_dates = ['2020-01-30','2020-02-15','2020-03-20','2021-01-05']
     amounts = [0, 70,50,25,1000]
-    taxes = [-10,10,20,4.3,12.0]
+    taxes = [10,10,20,4.3,12.0]
     tos = ['Microsoft','Bob','MyCompany.INS.INS20_001','Alice','Alice']
     froms = ['MyCompany.INR.INR00_000','MyCompany.INR.INR20_001','ClientMax','MyCompany.INR.INR21_001','MyCompany.INR.INR21_003']
     descriptions = ['dummy invoice', 'aaa', 'bbb', 'ccc', 'ddd']
