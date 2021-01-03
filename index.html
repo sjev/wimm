@@ -54,6 +54,8 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#why-wimm">Why WIMM</a>
     </li>
+    <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a>
+    </li>
     <li class="toctree-l2"><a class="reference internal" href="#documentation">Documentation</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How it works</a>
@@ -122,6 +124,13 @@ Well, there are many great advantages of of <em>plain text accounting</em>, to n
 <li>new tools/scripts are easy to build</li>
 </ul>
 <p>However, I could not find a piece of software that would sufficiently automate my workflow, especially around invoce and tax management. So WIMM was born.</p>
+<h2 id="installation">Installation</h2>
+<p>Wimm is currently in development phase. For this reason there is no pip package available.
+To install WIMM, clone the repository, then run</p>
+<pre><code class="language-none">pip install -r requirements.txt
+pip install -e .
+</code></pre>
+<p>(this will install wimm in development mode)</p>
 <h2 id="documentation">Documentation</h2>
 <p>see <a href="https://sjev.github.io/wimm/">WIMM documentation</a></p>
 <h2 id="how-it-works">How it works</h2>
@@ -149,8 +158,8 @@ Ext: 0.0
 <p><code>invoices.yaml</code> - overview of sent and received invoices. </p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>invoices that are sent have <strong>positive amounts</strong>.  These have id in a form <code>INS.YY_nnn</code> (INS stands for 'INvoice Sent').
-Received invoices have <strong>negative amounts</strong> indicating debt. The ids are <code>INR.YY_nnn</code> </p>
+<p>invoices have a predefined id that starts with INS or INR in a form <code>INSYY_nnn</code> (INS stands for 'INvoice Sent', INS for 'INvoice Received').
+INS and INR prefixes will be recognized by wimm, resulting in suggestions for accounts and tax handling.</p>
 </div>
 <pre><code class="language-yaml">- amount: 0
   date: '2000-12-31'
@@ -218,5 +227,5 @@ A file location is added as <code>documents</code> field to corresponing data en
 
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2020-12-31 12:37:35.869981+00:00
+Build Date UTC : 2021-01-03 18:40:50.800979+00:00
 -->
