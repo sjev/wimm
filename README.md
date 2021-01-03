@@ -25,6 +25,18 @@ Well, there are many great advantages of of *plain text accounting*, to name a f
 
 However, I could not find a piece of software that would sufficiently automate my workflow, especially around invoce and tax management. So WIMM was born.
 
+## Installation
+
+Wimm is currently in development phase. For this reason there is no pip package available.
+To install WIMM, clone the repository, then run
+
+``` none
+pip install -r requirements.txt
+pip install -e .
+```
+(this will install wimm in development mode)
+
+
 ## Documentation
 
 see [WIMM documentation](https://sjev.github.io/wimm/)
@@ -65,8 +77,8 @@ Ext: 0.0
 `invoices.yaml` - overview of sent and received invoices. 
 
 !!! note
-	invoices that are sent have **positive amounts**.  These have id in a form `INS.YY_nnn` (INS stands for 'INvoice Sent').
-	Received invoices have **negative amounts** indicating debt. The ids are `INR.YY_nnn` 
+	invoices have a predefined id that starts with INS or INR in a form `INSYY_nnn` (INS stands for 'INvoice Sent', INS for 'INvoice Received').
+	INS and INR prefixes will be recognized by wimm, resulting in suggestions for accounts and tax handling.
 
 ``` yaml
 - amount: 0
