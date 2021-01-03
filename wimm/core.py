@@ -213,7 +213,7 @@ class Transaction:
         """ create from old (v1) dict type """
 
         d = {'date': tr['date'],
-             'description': tr['description'],
+             'description': tr.get('description',None),
              'transfers': {tr['from']: -tr['amount'],
                            tr['to']: tr['amount']}
              }

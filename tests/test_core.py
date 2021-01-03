@@ -40,10 +40,17 @@ def test_transaction():
     
 def test_transaction_v1():
 
-    tr = core.Transaction.from_v1(structure.v1_transaction)
-    assert tr.date == structure.v1_transaction['date']
+    d_v1 = structure.v1_transactions[0]
+
+    tr = core.Transaction.from_v1(d_v1)
+    assert tr.date == d_v1['date']
     assert tr.transfers['Ext.Bob'] == -1000
     assert tr.transfers['Assets.Bank'] == 1000
+    assert tr.description == 'Customer paid invoice'
+    
+    # one without description
+    d_v1 = structure.v1_transactions[1]
+    tr = core.Transaction.from_v1(d_v1)
     
 def test_transactions_roundtrip():
     

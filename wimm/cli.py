@@ -103,6 +103,10 @@ def add():
     """ add items to database """
     pass
 
+@click.group()
+def convert():
+    """ conversion utils """
+    pass
 
 @click.group('import')
 def import_data():
@@ -263,6 +267,15 @@ def add_invoice(prefix, pattern, no_hash):
             f.write(inv.transactions().to_yaml())
 
 
+@click.command('transactions')
+def convert_transactions():
+    
+    if click.confirm('Transactions file will be overwritten. Sure?'):
+        fname = PATH / structure.files['transactions']
+        data_v1 = yaml.load(fname.open(), Loader=yaml.SafeLoader)
+        trs = core.Transactions([wimm.core.Transaction.from_v1(d).to_dict() for d in data_v1])
+        trs.to_yaml(fname)
+
 # build groups
 import_data.add_command(import_statement)
 
@@ -270,6 +283,7 @@ show.add_command(show_balance)
 show.add_command(show_transactions)
 show.add_command(show_invoices)
 
+convert.add_command(convert_transactions)
 
 add.add_command(add_invoice)
 
@@ -279,6 +293,8 @@ cli.add_command(import_data)
 cli.add_command(show)
 cli.add_command(info)
 cli.add_command(add)
+cli.add_command(convert)
+
 
 
 if __name__ == "__main__":  # note - name will be wimm.cli in case of terminal cmd

@@ -49,11 +49,17 @@ transaction = {'date': '2020-01-01',
                'transfers': 
                      {'AAA': 32, 'BBB':-30, 'CCC': None}}
 
-v1_transaction = {'date' : '2020-01-01',
+v1_transactions = [{'date' : '2020-01-01',
                'from' : 'Ext.Bob',
                'to' : 'Assets.Bank',
                'amount' : 1000.0,
-               'description' : 'Customer paid invoice'}
+               'description' : 'Customer paid invoice'},
+               {'date' : '2020-01-01',
+               'from' : 'Ext.Bob',
+               'to' : 'Assets.Bank',
+               'amount' : 1000.0} ]
+                   
+                   
 
 transactions = [{'date': '2020-01-01',
                   'description': 'Customer paid invoice',
