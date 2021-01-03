@@ -55,24 +55,15 @@ v1_transaction = {'date' : '2020-01-01',
                'amount' : 1000.0,
                'description' : 'Customer paid invoice'}
 
-transactions = [ {'date' : '2020-01-01',
-               'from' : 'Ext.Bob',
-               'to' : 'Assets.Bank',
-               'amount' : 1000.0,
-               'description' : 'Customer paid invoice'},
-                
-                {'date' : '2020-01-02',
-               'from' : 'Assets.Bank',
-               'to' : 'Expenses',
-               'amount' : 50.0,
-               'description' : 'bought some pens',
-               'category': 'office supplies'   },
-                
-                {'date' : '2020-01-03',
-               'from' : 'Liabilities',
-               'to' : 'Assets.Bank',
-               'amount' : 150.0,
-               'description' : 'Borrowed some money from Bob'    } ]
+transactions = [{'date': '2020-01-01',
+                  'description': 'Customer paid invoice',
+                  'transfers': {'Assets.Bank': 1000.0, 'Ext.Bob': -1000.0}},
+                 {'date': '2020-01-02',
+                  'description': 'bought some pens',
+                  'transfers': {'Assets.Bank': -50.0, 'Expenses': 50.0}},
+                 {'date': '2020-01-03',
+                  'description': 'Borrowed some money from Bob',
+                  'transfers': {'Assets.Bank': 150.0, 'Liabilities': -150.0}}]
 
 
 #%% invoice definition

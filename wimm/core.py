@@ -40,6 +40,7 @@ import pandas as pd
 import wimm
 from dataclasses import dataclass, asdict
 
+
 def parse_account(s):
     """ parse entity and account string """
 
@@ -124,17 +125,15 @@ def parse_bank_statement(self, statement_file, acct_name='Assets.bank', bank='AS
 def balance(transactions, start_balance=None, invoices=None, depth=None):
     """ calculate balance """
 
-
-
     accounts = transactions.process()
-    
+
     if start_balance is not None:
         accounts = accounts.add(start_balance, fill_value=0)
 
     # if invoices is not None:
     #     inv_acc  = invoices.to_accounts() # convert to series
     #     accounts = accounts.add(inv_acc, fill_value=0)
-        
+
     names = accounts.index.to_list()
 
     if depth is None:
@@ -145,6 +144,12 @@ def balance(transactions, start_balance=None, invoices=None, depth=None):
 
 class ListPlus(UserList):
     """ base extensions for a list """
+    cls_factory = None  # replace this by a class to create items
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.cls_factory is not None:
+            self.data = [self.cls_factory(**d) for d in self.data]
 
     def to_yaml(self, yaml_file=None, confirm=False):
         """ write to file or return string """
@@ -154,7 +159,7 @@ class ListPlus(UserList):
         if yaml_file:
             utils.save_yaml(yaml_file, data, ask_confirmation=confirm)
 
-        return yaml.dump(data,sort_keys=False)
+        return yaml.dump(data, sort_keys=False)
 
     @classmethod
     def from_yaml(cls, yaml_file):
@@ -162,21 +167,24 @@ class ListPlus(UserList):
 
         data = yaml.load(open(yaml_file), Loader=yaml.SafeLoader)
 
+        # if cls.cls_factory is None:
         return cls(data)
+        # else:
+        #    return cls( [cls.cls_factory.from_dict(d) for d in data])
 
-@dataclass 
+
+@dataclass
 class Transaction:
     date: str
     description: str
-    transfers : dict 
+    transfers: dict
     labels: str = None
-        
-    
+
     def __post_init__(self):
-        
+
         total = 0
         missing = None
-        for k,v in self.transfers.items():
+        for k, v in self.transfers.items():
             if not v:
                 if missing is None:
                     missing = k
@@ -184,56 +192,67 @@ class Transaction:
                     raise ValueError('More than one entry is missing')
             else:
                 total += v
-        self.transfers[missing] = -total
-    
+
+        if missing:
+            self.transfers[missing] = -total
+
+    def to_records(self):
+        """ convert to simple account operations """
+        return  [ {'date':self.date, 'account':acct, 'amount':amount}  for acct,amount in self.transfers.items() ]
+
     @classmethod
-    def from_dict(cls,d):
+    def from_dict(cls, d):
         return cls(**d)
-    
+
     def to_dict(self):
         """ save to dict dropping None values """
-        return { k:v for k,v in asdict(self).items() if v is not None}
-    
+        return {k: v for k, v in asdict(self).items() if v is not None}
+
     @classmethod
     def from_v1(cls, tr):
         """ create from old (v1) dict type """
-    
-        
-        d = {'date':tr['date'],
-             'description':tr['description'],
-             'transfers': {tr['from'] : -tr['amount'],
-                           tr['to'] : tr['amount']}
+
+        d = {'date': tr['date'],
+             'description': tr['description'],
+             'transfers': {tr['from']: -tr['amount'],
+                           tr['to']: tr['amount']}
              }
         return cls(**d)
 
 
-
 class Transactions(ListPlus):
     """ transactons class, extension of a list """
+    cls_factory = Transaction
+
+    def to_records(self):
+        for tr in self.data:
+            for rec in tr.to_records():
+                yield rec
 
     def process(self):
         """ return accounts and their balances """
-        tr = pd.DataFrame.from_records(self.data)
-        return tr.groupby(['to']).amount.sum().subtract(tr.groupby(['from']).amount.sum(), fill_value=0)
-
+        tr = pd.DataFrame.from_records(self.to_records())
+        return tr.groupby(['account']).sum()['amount']
 
 
 class Invoice(UserDict):
-     
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
-        keys = ['id','amount','tax','date','from','to','description','attachment','due_date','ext_name']
-        vals = ['INV00_000', 0.0, None,  None, 'Uncategorized', 'Uncategorized', None, None, None,'ext_company_name']
-        for k,v in zip(keys,vals):
-            self.setdefault(k,v)
-        
-    def __getattr__(self,name):
+
+        keys = ['id', 'amount', 'tax', 'date', 'from', 'to',
+                'description', 'attachment', 'due_date', 'ext_name']
+        vals = ['INV00_000', 0.0, None,  None, 'Uncategorized',
+                'Uncategorized', None, None, None, 'ext_company_name']
+        for k, v in zip(keys, vals):
+            self.setdefault(k, v)
+
+    def __getattr__(self, name):
         if name in self.data:
             return self.data[name]
         else:
             raise AttributeError(name)
-         
+
     @property
     def prefix(self):
         return self['id'][:3]
@@ -242,41 +261,41 @@ class Invoice(UserDict):
 
         utils.validate(self.data['id'], "IN([A-Z]{1}[0-9]{2}_[0-9]{3})")
         utils.validate(self.data['date'], "([0-9]{4}-[0-9]{2}-[0-9]{2})")
-        
-    def set_accounts(self, accounts = None):
-        
+
+    def set_accounts(self, accounts=None):
+
         if accounts is None:
-            params = { 'invoice_id':self.id, 'ext_name':  self.ext_name}
-            accounts = utils.invoice_accounts(self.prefix, params, 'invoice_accounts')
-        
+            params = {'invoice_id': self.id, 'ext_name':  self.ext_name}
+            accounts = utils.invoice_accounts(
+                self.prefix, params, 'invoice_accounts')
+
         self.data['from'] = accounts['from']
         self.data['to'] = accounts['to']
-             
 
     def transactions(self):
         """ return ivoice transactions as a list """
-        
+
         trs = Transactions()
-        
+
         # ----- invoice transaction
-               
-        trs.append({'date':self.date,
+
+        trs.append({'date': self.date,
                     'description': 'Invoice '+self.id,
                     'amount': self.amount,
                     'from': self['from'],
-                    'to':self['to']})
-        
+                    'to': self['to']})
+
         # ----- tax transaction
         if self.tax:
-            params = { 'invoice_id':self.id, 'ext_name':  self.ext_name}
-            accounts = utils.invoice_accounts(self.prefix, params, 'tax_accounts')
-            
-            trs.append({'date':self.date,
+            params = {'invoice_id': self.id, 'ext_name':  self.ext_name}
+            accounts = utils.invoice_accounts(
+                self.prefix, params, 'tax_accounts')
+
+            trs.append({'date': self.date,
                         'description': 'Tax for invoice '+self.id,
                         'amount': self.tax,
                         **accounts})
-        
-    
+
         return trs
 
     def to_yaml(self):
@@ -343,22 +362,21 @@ class Invoices(ListPlus):
     def to_df(self):
         """ convert to DataFrame """
         return pd.DataFrame.from_records(self.data)
-    
+
     def to_transactions(self):
         """ convert to transactions """
-        
+
         trs = Transactions()
         for inv in self.data:
             trs += inv.transactions()
-           
+
         return trs
-            
-            
+
     def to_accounts(self):
         """ convert to accounts, including taxes """
-        df =self.to_df()
-        acc = df.set_index('id')['amount'] # account series
-        tax = pd.Series( [df.tax[df.tax>0].sum(),
-                    df.tax[df.tax<0].sum()],
-                    index=['tax.to_receive','tax.to_pay'])
-        return pd.concat((acc,tax))
+        df = self.to_df()
+        acc = df.set_index('id')['amount']  # account series
+        tax = pd.Series([df.tax[df.tax > 0].sum(),
+                         df.tax[df.tax < 0].sum()],
+                        index=['tax.to_receive', 'tax.to_pay'])
+        return pd.concat((acc, tax))
