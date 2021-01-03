@@ -13,6 +13,7 @@ from pathlib import Path
 cwd = Path(os.getcwd())
 sys.path.insert(0, cwd.parent.as_posix())  
 
+import wimm
 from wimm import core
 import wimm.structure as structure
 import wimm.utils as utils
@@ -123,8 +124,23 @@ def test_invoices_conversion():
 def test_invoice_accounts():
     """ test correct formatting for 'from' and 'to' invoice names """
     
-    prefix = 'FOO'
-    invoice_id = 'INV_000'
     
-    res = utils.invoice_accounts(prefix, invoice_id)
+    wimm.settings = structure.settings
+    
+    prefix = 'FOO'
+    params = { 'invoice_id':'INV_000', 'ext_name':'ext_name' }
+    
+    res = utils.invoice_accounts(prefix, params)
     assert res == {'from':'Uncategorized', 'to':'Uncategorized'}
+    
+    prefix = 'INR'
+    res = utils.invoice_accounts(prefix, params)
+    
+    assert res == {'to':'Out.ext_name',
+                   'from': 'MyCompany.INR.INV_000'}
+    
+    prefix = 'INS'
+    res = utils.invoice_accounts(prefix, params)
+    
+    assert res == {'from':'In.ext_name',
+                   'to': 'MyCompany.INS.INV_000'}

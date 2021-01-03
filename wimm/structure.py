@@ -14,10 +14,10 @@ settings = {'company_name': 'MyCompany',
             'tax_external_acct' : 'Belastingdienst',
             'tax_internal_acct' : 'BTW',
             'invoice_accounts':  {
-                                  'INR': {'from':'Suppliers.{ext_name}',
-                                        'to':'{company_name}.INR.{invoice_id}'},
-                                  'INS': {'from':'',
-                                         'to':''},
+                                  'INR': {'to':'Out.{ext_name}',
+                                        'from':'{company_name}.INR.{invoice_id}'},
+                                  'INS': {'to':'{company_name}.INS.{invoice_id}',
+                                         'from':'In.{ext_name}'},
                                 }
             }
 

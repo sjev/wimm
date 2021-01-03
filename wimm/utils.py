@@ -243,9 +243,10 @@ def names_to_labels(names, depth = 1, sep='.'):
         labels.append('.'.join(fields[:depth]) if len(fields) >= depth else name)
     return labels
 
-def invoice_accounts(prefix, invoice_id):
+def invoice_accounts(prefix, params):
     """ 
     helper for invoice accounts. 
+    
     Returns: {'from': acct, 'to': acct }
     """
     
@@ -254,4 +255,11 @@ def invoice_accounts(prefix, invoice_id):
     if prefix not in accs:
         return {'from':'Uncategorized', 'to':'Uncategorized'}
     
+    params.setdefault('company_name', wimm.settings['company_name'])
+    
+    out = {}
+    for k,v in accs[prefix].items():
+        out[k] = v.format(**params)
+        
+    return out
     
