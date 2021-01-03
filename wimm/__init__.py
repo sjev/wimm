@@ -1,4 +1,4 @@
-__version__ = "DEV.0.0.2"
+__version__ = "DEV.0.0.8"
 
 DATE_FMT = "%Y-%m-%d"
 

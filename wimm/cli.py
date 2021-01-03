@@ -16,6 +16,7 @@ import shutil
 from pathlib import Path
 import click
 from click import echo
+import yaml
 
 
 def start_balance():
@@ -33,15 +34,56 @@ def invoices():
 def hasher():
     return utils.Hasher(PATH / structure.files['hashes'])
 
+def initialize():
+    """ 
+    initialization function for data 
+    names are comma separated items
+    
+    """
+   
+    
+    if click.confirm('Init files?'):
+        # create files
+        utils.save_yaml(PATH / structure.files['balance'], structure.accounts)
+        utils.save_yaml(
+            PATH / structure.files['transactions'], structure.transactions)
+        utils.save_yaml(PATH / structure.files['invoices'], structure.invoices())
+    
+        # create folders
+        for folder in structure.folders.values():
+            p = PATH / folder
+            if not p.exists():
+                p.mkdir()
+    
+    if click.confirm('Init hash?'):
+        echo('Rebuilding hashes')
+        h = hasher()
+        h.delete_hashes()
+    
+        for key in ['INR', 'INS']:
+            h.add(PATH / structure.folders[key])
+
+    if click.confirm('Init settings?'):
+        
+        settings = structure.settings
+        settings['company_name'] = click.prompt('Company name:', settings['company_name'])
+        
+        utils.save_yaml(PATH / structure.files['settings'], 
+                        settings,
+                        ask_confirmation=False)
+
 
 @click.command()
 def info():
     """ show status """
-    echo(f'PATH: {PATH}')
+    #echo(f'PATH: {PATH}')
     echo('Hashed files: %i' % len(hasher().hashes))
-    echo('-----settings-----')
     for k, v in wimm.settings.items():
-        print(f'{k}: {v}')
+        if isinstance(v,dict):
+            print(k)
+            print(yaml.dump(v))
+        else:
+            print(f'{k}: {v}')
 
 
 @click.group()
@@ -68,39 +110,10 @@ def import_data():
     pass
 
 
-@click.group()
+@click.command()
 def init():
     """ initialize data, use with caution """
-    pass
-
-
-@click.command('files')
-def init_files():
-    """ initialize current directory with necessary files. Also creates a settings file in user directory"""
-
-    # create files
-    utils.save_yaml(PATH / structure.files['balance'], structure.accounts)
-    utils.save_yaml(
-        PATH / structure.files['transactions'], structure.transactions)
-    utils.save_yaml(PATH / structure.files['invoices'], structure.invoices())
-    utils.save_yaml(PATH / structure.files['settings'], structure.settings)
-
-    # create folders
-    for folder in structure.folders.values():
-        p = PATH / folder
-        if not p.exists():
-            p.mkdir()
-
-
-@click.command('hash')
-def init_hash():
-    """ rebuild stored file hashes """
-
-    h = hasher()
-    h.delete_hashes()
-
-    for key in ['INR', 'INS']:
-        h.add(PATH / structure.folders[key])
+    initialize()
 
 
 @click.command('statement')
@@ -240,8 +253,6 @@ show.add_command(show_balance)
 show.add_command(show_transactions)
 show.add_command(show_invoices)
 
-init.add_command(init_files)
-init.add_command(init_hash)
 
 add.add_command(add_invoice)
 
