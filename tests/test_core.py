@@ -120,3 +120,11 @@ def test_invoices_conversion():
                   'from':'MyCompany.INR.INR00_000',
                   'to':'Microsoft'}
     
+def test_invoice_accounts():
+    """ test correct formatting for 'from' and 'to' invoice names """
+    
+    prefix = 'FOO'
+    invoice_id = 'INV_000'
+    
+    res = utils.invoice_accounts(prefix, invoice_id)
+    assert res == {'from':'Uncategorized', 'to':'Uncategorized'}

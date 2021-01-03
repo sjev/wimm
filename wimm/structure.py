@@ -12,7 +12,15 @@ Used for initialization and testing
 settings = {'company_name': 'MyCompany',
             'tax_rate': 0.21,
             'tax_external_acct' : 'Belastingdienst',
-            'tax_internal_acct' : 'BTW'}
+            'tax_internal_acct' : 'BTW',
+            'invoice_accounts':  {
+                                  'INR': {'from':'Suppliers.{ext_name}',
+                                        'to':'{company_name}.INR.{invoice_id}'},
+                                  'INS': {'from':'',
+                                         'to':''},
+                                }
+            }
+
 
 
 files = {'balance':'balance.yaml',

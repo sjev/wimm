@@ -17,13 +17,13 @@ def get_path():
         return None
     return Path(val)
 
-this.config = {'path': get_path() }
+this.settings = {'path': get_path() }
 
 def get_settings():
     """ get settings from file or defaults """
     
     import wimm.structure as structure
-    path = this.config['path']
+    path = this.settings['path']
     
     if path is None:
         return structure.settings
@@ -38,4 +38,4 @@ def get_settings():
         
     
     
-this.config = {**this.config, **get_settings()}
+this.settings = {**this.settings, **get_settings()}

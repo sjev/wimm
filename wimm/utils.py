@@ -219,9 +219,39 @@ class Hasher:
         return hsh in self.hashes
     
 def names_to_labels(names, depth = 1, sep='.'):
-    """ split names to grouping labels """
+    """
+    convert names to grouping labels
+
+    Parameters
+    ----------
+    names : [str]
+        account names in form of 'Foo.Bar.Baz'
+    depth : int, optional
+        returned label depth. The default is 1.
+    sep : char, optional
+        Separator character. The default is '.'.
+
+    Returns
+    -------
+    labels : [str]
+        names converted to labels.
+
+    """
     labels = []
     for name in names:
         fields  = name.split(sep)
         labels.append('.'.join(fields[:depth]) if len(fields) >= depth else name)
     return labels
+
+def invoice_accounts(prefix, invoice_id):
+    """ 
+    helper for invoice accounts. 
+    Returns: {'from': acct, 'to': acct }
+    """
+    
+    accs = wimm.settings['invoice_accounts']
+    
+    if prefix not in accs:
+        return {'from':'Uncategorized', 'to':'Uncategorized'}
+    
+    

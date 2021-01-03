@@ -217,11 +217,11 @@ class Invoice(UserDict):
         out = {'date': self.data['date'], 'amount' : abs(tax)}
         
         if tax > 0:
-            out['from'] = wimm.config['tax_external_acct']
-            out['to'] = wimm.config['company_name'] +'.tax.to_receive'
+            out['from'] = wimm.settings['tax_external_acct']
+            out['to'] = wimm.settings['company_name'] +'.tax.to_receive'
         elif tax < 0:
-            out['from'] = wimm.config['company_name'] +'.tax.to_pay'
-            out['to'] =  wimm.config['tax_external_acct']
+            out['from'] = wimm.settings['company_name'] +'.tax.to_pay'
+            out['to'] =  wimm.settings['tax_external_acct']
             
         return out    
    

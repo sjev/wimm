@@ -39,8 +39,8 @@ def info():
     """ show status """
     echo(f'PATH: {PATH}')
     echo('Hashed files: %i' % len(hasher().hashes))
-    echo('-----config-----')
-    for k, v in wimm.config.items():
+    echo('-----settings-----')
+    for k, v in wimm.settings.items():
         print(f'{k}: {v}')
 
 
@@ -76,7 +76,7 @@ def init():
 
 @click.command('files')
 def init_files():
-    """ initialize current directory with necessary files. Also creates a config file in user directory"""
+    """ initialize current directory with necessary files. Also creates a settings file in user directory"""
 
     # create files
     utils.save_yaml(PATH / structure.files['balance'], structure.accounts)
@@ -257,6 +257,6 @@ if __name__ == "__main__":  # note - name will be wimm.cli in case of terminal c
 
     PATH = list(Path(__file__).parents)[1] / 'tests/data'
 else:
-    PATH = wimm.config['path']
+    PATH = wimm.settings['path']
     if not PATH:
         echo("WARNING: environment variable WIMM_PATH is not set")
