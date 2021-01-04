@@ -38,6 +38,9 @@ def test_transaction():
     assert tr.date == '2020-01-01'
     assert tr.transfers['CCC'] == -2
     
+    y = tr.to_yaml()
+    print(y)
+    
 def test_transaction_v1():
 
     d_v1 = structure.v1_transactions[0]
@@ -134,9 +137,9 @@ def test_invoice_accounts():
     """ test correct formatting for 'from' and 'to' invoice names """
     
     
-    inv = core.Invoice(id="INR_000", tax = 10, ext_name = 'CorpX')
+    inv = core.Invoice(id="INR_000", amount=100, tax = 10, ext_name = 'CorpX')
     inv.set_accounts()
-    trs = inv.transactions()
+    trs = inv._transactions()
     
     tr = trs[0]
     assert tr['to'] == 'Out.CorpX'
@@ -147,6 +150,12 @@ def test_invoice_accounts():
     assert tr['from'] == 'Taxes'
     
     
+    # new style
+    tr = inv.transaction()
+    assert tr.transfers['MyCompany.tax.to_receive'] == 10
+    assert tr.transfers['MyCompany.INR.INR_000'] == - 100
+    
+    #----------------------
     prefix = 'FOO'
     params = { 'invoice_id':'INV_000', 'ext_name':'ext_name' }
     
@@ -162,3 +171,5 @@ def test_invoice_accounts():
     
     assert res == {'from':'In.ext_name',
                    'to': 'MyCompany.INS.INV_000'}
+    
+    # 

@@ -264,7 +264,7 @@ def add_invoice(prefix, pattern, no_hash):
             f.write(invoices_new.to_yaml())
             
         with (PATH / structure.files['transactions']).open('a') as f:
-            f.write(inv.transactions().to_yaml())
+            f.write(inv.transaction().to_yaml())
 
 
 @click.command('transactions')

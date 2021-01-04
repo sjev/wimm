@@ -185,7 +185,7 @@ class Transaction:
         total = 0
         missing = None
         for k, v in self.transfers.items():
-            if not v:
+            if v is None:
                 if missing is None:
                     missing = k
                 else:
@@ -210,6 +210,9 @@ class Transaction:
             return {k: v for k, v in asdict(self).items() if v is not None}
         else:
             return asdict(self)
+        
+    def to_yaml(self, compact=True):
+        return yaml.dump([self.to_dict(compact)], sort_keys=False)
 
     @classmethod
     def from_v1(cls, tr):
@@ -275,8 +278,18 @@ class Invoice(UserDict):
         self.data['from'] = accounts['from']
         self.data['to'] = accounts['to']
 
-    def transactions(self):
-        """ return ivoice transactions as a list """
+    def transaction(self):
+        """ single transaction for an invoice """
+        
+        # TODO: refactor. Ok, it's late and I don't have time to rewrite all the old code.
+        # so  I'll just gently wrap it in a new function.
+        trs = [Transaction.from_v1(tr) for tr in self._transactions()]
+        tr = trs[0]
+        tr.transfers = {**tr.transfers, **trs[1].transfers}
+        return tr
+
+    def _transactions(self):
+        """ return ivoice transactions as a list, `old style` transactions """
 
         trs = Transactions()
 
