@@ -1,5 +1,9 @@
 # temp files
 *.swp
+tmp/
+
+# doc builds
+site/
 
 # specific files
 transactions.yaml
