@@ -172,4 +172,11 @@ def test_invoice_accounts():
     assert res == {'from':'In.ext_name',
                    'to': 'MyCompany.INS.INV_000'}
     
-    # 
+def test_invoice_transaction():
+    
+    # test invoice without tax
+    d = {'id':'DEC00_000', 'amount': 100, 'from':'Foo', 'to':'Bar','tax':0} 
+                       
+    inv = core.Invoice(d)
+    tr = inv.transaction()
+    print(tr)

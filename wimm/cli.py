@@ -186,85 +186,101 @@ def show_invoices():
     for inv in invoices():
         print(inv)
    
-
-@click.command('invoice')
-@click.argument('prefix')
-@click.argument("pattern")
-@click.option("--no_hash", is_flag=True, help = "Do not check if file is already in database")
-def add_invoice(prefix, pattern, no_hash):
-    """ add invoice(s).  
     
-    \b
-    PREFIX invoice prefix, 3 characters (INR,INS etc.)
-    PATTERN filename or a search pattern, like *.pdf
+def add_invoice(prefix, src_file=None, no_hash = False):
+    """ add a single invoice """
     
-    """
-    import subprocess
-    import sys
+    
+    if src_file is not None:
+        assert src_file.exists(), 'File not found'
+    
+    inv = core.Invoice()
 
-    if pattern[0] == '*':
-        files = [p.absolute() for p in Path('.').glob(pattern)]
-        # sort on modification times
-        files = sorted(files, key=os.path.getmtime)
-        echo(f'Adding {len(files)} files')
-    else:
-        files = [Path(pattern).absolute()]
-
-    for src_file in files:
-        if not src_file.exists():
-            echo('File not found')
-            continue
-
-        if not no_hash:
-            hsh = hasher()
-            if hsh.is_present(src_file):
-                echo(f'{src_file} is already in database.')
-                continue
-
-        
-        devnull = open(os.devnull, 'w')
-        opener = "open" if sys.platform == "darwin" else "xdg-open"
-        subprocess.call([opener, src_file.as_posix()],
-                        stdout=devnull, stderr=devnull)
-
-
-        inv = core.Invoice()
-
-        inv['amount'] = click.prompt('amount', type=float)
-
-        inv['id'] = click.prompt('id', invoices().get_next_id(prefix))
-        inv['tax'] = click.prompt('tax', utils.tax(inv['amount']))
-
-        inv['ext_name'] = click.prompt('ext_company_name')
-        
-        inv.set_accounts()
-        inv['from'] = click.prompt('from acct', inv['from'])
-        inv['to'] = click.prompt('to acct', inv['to'])
-
-        inv['description'] = click.prompt('description')
-        inv['date'] = click.prompt('date', utils.date())
-        inv['due_date'] = click.prompt(
-            'due_date', utils.date_offset(inv['date'], 30))
-
+    inv['amount'] = click.prompt('amount', type=float)
+    
+    inv['id'] = click.prompt('id', invoices().get_next_id(prefix))
+    inv['tax'] = click.prompt('tax', utils.tax(inv['amount']))
+    
+    inv['ext_name'] = click.prompt('ext_company_name')
+    
+    inv.set_accounts()
+    inv['from'] = click.prompt('from acct', inv['from'])
+    inv['to'] = click.prompt('to acct', inv['to'])
+    
+    inv['description'] = click.prompt('description')
+    inv['date'] = click.prompt('date', utils.date())
+    inv['due_date'] = click.prompt(
+        'due_date', utils.date_offset(inv['date'], 30))
+    
+    if src_file is not None:
         dest_file = PATH / \
             structure.folders[prefix] / \
             (inv['id']+'_'+src_file.name.replace(' ', '_'))
         echo('copying file to:'+str(dest_file))
         shutil.copy(src_file, dest_file)
+        inv['attachment'] = dest_file.relative_to(PATH).as_posix()
         
-        if not no_hash:
+        if not no_hash: 
+            hsh = hasher()
             hsh.add(dest_file)
 
-        inv['attachment'] = dest_file.relative_to(PATH).as_posix()
+    
+    invoices_new = core.Invoices()
+    invoices_new.append(inv)
+    
+    with open(PATH / structure.files['invoices'], 'a') as f:
+        f.write(invoices_new.to_yaml())
+        
+    with (PATH / structure.files['transactions']).open('a') as f:
+        f.write(inv.transaction().to_yaml())
+    
 
-        invoices_new = core.Invoices()
-        invoices_new.append(inv)
+@click.command('invoice')
+@click.argument('prefix')
+@click.option('--pattern','-p', default=None, help = 'Filename or a search pattern, like *.pdf' )
+@click.option("--no_hash", is_flag=True, help = "Do not check if file is already in database")
+def add_invoices(prefix, pattern, no_hash):
+    """ add invoice(s).  
+    
+    \b
+    PREFIX invoice prefix, 3 characters (INR,INS etc.)
+    
+    """
+    import subprocess
+    import sys
 
-        with open(PATH / structure.files['invoices'], 'a') as f:
-            f.write(invoices_new.to_yaml())
+    if pattern is None:
+        add_invoice(prefix)
+        return
+        
+    else:
+        if pattern[0] == '*':
+            files = [p.absolute() for p in Path('.').glob(pattern)]
+            # sort on modification times
+            files = sorted(files, key=os.path.getmtime)
+            echo(f'Adding {len(files)} files')
+        else:
+            files = [Path(pattern).absolute()]
+
+    for src_file in files:
+        try:
+            assert src_file.exists(), 'File not found'    
             
-        with (PATH / structure.files['transactions']).open('a') as f:
-            f.write(inv.transaction().to_yaml())
+            if not no_hash:
+                hsh = hasher()
+                assert hsh.is_present(src_file) == False, f'{src_file} is already in database.'
+            
+            devnull = open(os.devnull, 'w')
+            opener = "open" if sys.platform == "darwin" else "xdg-open"
+            subprocess.call([opener, src_file.as_posix()],
+                            stdout=devnull, stderr=devnull)
+
+            add_invoice(prefix,src_file,no_hash)
+            
+            
+        except AssertionError as e:
+            echo(e)
+
 
 
 @click.command('transactions')
@@ -285,7 +301,7 @@ show.add_command(show_invoices)
 
 convert.add_command(convert_transactions)
 
-add.add_command(add_invoice)
+add.add_command(add_invoices)
 
 # build top levelcommands
 cli.add_command(init)

@@ -285,7 +285,8 @@ class Invoice(UserDict):
         # so  I'll just gently wrap it in a new function.
         trs = [Transaction.from_v1(tr) for tr in self._transactions()]
         tr = trs[0]
-        tr.transfers = {**tr.transfers, **trs[1].transfers}
+        if len(trs) == 2:
+            tr.transfers = {**tr.transfers, **trs[1].transfers}
         return tr
 
     def _transactions(self):
