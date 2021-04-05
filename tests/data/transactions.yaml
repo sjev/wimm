@@ -1,22 +1,39 @@
-- amount: 5000.0
-  date: '2020-01-01'
-  description: Customer paid invoice
-  from: INS.20_001
-  to: Assets.bank
-- amount: 50.0
-  category: office supplies
-  date: '2020-01-02'
+- date: '2021-03-22'
+  description: sent invoice
+  transfers:
+    Ext.AIGRO: -5041.67
+    Sojuz.INS.INS21_002: 5041.67
+    Sojuz.tax.to_pay: -875.0
+    Ext.Taxes: 875.0
+  invoice:
+    id: INS21_002
+    amount: 5041.67
+    due_date: '2021-04-24'
+    attachment: documents/INS21_002.pdf
+
+- date: '2021-03-22'
+  description: sent invoice
+  transfers:
+    Ext.AIGRO: -5041.67
+    Sojuz.INS.INS21_001: 5041.67
+    Sojuz.tax.to_pay: -875.0
+    Ext.Taxes: 875.0
+  invoice:
+    id: INS21_002
+    amount: 5041.67
+    due_date: '2021-04-24'
+    attachment: documents/INS21_001.pdf
+
+- date: '2020-01-02'
   description: bought some pens
-  from: Assets.bank
-  to: Expenses
-- amount: 150.0
-  date: '2020-01-03'
+  transfers:
+    Assets.Bank: -50.0
+    Ext: 50.0
+
+- date: '2020-01-03'
   description: Borrowed some money from Bob
-  from: Bob
-  to: Assets.bank
-- amount: 33.28
-  date: '2020-01-03'
-  description: Payed INR20_001
-  from: Assets.bank
-  to: INR.20_001
+  transfers:
+    Assets.Bank: 150.0
+    Liabilities: -150.0
+
 
