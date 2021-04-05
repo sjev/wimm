@@ -2,8 +2,8 @@
   description: sent invoice
   transfers:
     Ext.AIGRO: -5041.67
-    Sojuz.INS.INS21_002: 5041.67
-    Sojuz.tax.to_pay: -875.0
+    MyCompany.INS.INS21_002: 5041.67
+    MyCompany.tax.to_pay: -875.0
     Ext.Taxes: 875.0
   invoice:
     id: INS21_002
@@ -15,8 +15,8 @@
   description: sent invoice
   transfers:
     Ext.AIGRO: -5041.67
-    Sojuz.INS.INS21_001: 5041.67
-    Sojuz.tax.to_pay: -875.0
+    MyCompany.INS.INS21_001: 5041.67
+    MyCompany.tax.to_pay: -875.0
     Ext.Taxes: 875.0
   invoice:
     id: INS21_002
@@ -33,7 +33,7 @@
 - date: '2020-01-03'
   description: Borrowed some money from Bob
   transfers:
-    Assets.Bank: 150.0
-    Liabilities: -150.0
+    MyCompany.Bank: 150.0
+    MyCompany.Liabilities.Bob: -150.0
 
 
