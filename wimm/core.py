@@ -51,8 +51,7 @@ def load_data(name, db_path):
     """ load data from yaml """
     import wimm.structure as structure
     fcns = {'balance': load_start_balance,
-            'transactions': Transactions.from_yaml,
-            'invoices': Invoices.from_yaml}
+            'transactions': Transactions.from_yaml}
 
     p = db_path / structure.files[name]
     assert p.exists(), f"File {p} not found"
@@ -171,81 +170,6 @@ class ListPlus(UserList):
         return cls(data)
         # else:
         #    return cls( [cls.cls_factory.from_dict(d) for d in data])
-
-
-class Transaction(UserDict):
-
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        keys = ['date', 'description', 'transfers']
-        vals = [None, None , None,  None]
-        for k, v in zip(keys, vals):
-            self.setdefault(k, v)
-
-        self.__fix_total()
-
-    def __getattr__(self, name):
-        if name in self.data:
-            return self.data[name]
-        else:
-            raise AttributeError(name)
-
-
-
-    def __fix_total(self):
-
-        total = 0
-        missing = None
-        for k, v in self.transfers.items():
-            if v is None:
-                if missing is None:
-                    missing = k
-                else:
-                    raise ValueError('More than one entry is missing')
-            else:
-                total += v
-
-        if missing:
-            self.transfers[missing] = -total
-
-    def to_records(self):
-        """ convert to simple account operations """
-        return  [ {'date':self.date, 'account':acct, 'amount':amount}  for acct,amount in self.transfers.items() ]
-
-    @classmethod
-    def from_dict(cls, d):
-        return cls(**d)
-
-    def to_yaml(self):
-        return yaml.dump(self.data, sort_keys=False)
-
-    @classmethod
-    def from_v1(cls, tr):
-        """ create from old (v1) dict type """
-
-        d = {'date': tr['date'],
-             'description': tr.get('description',None),
-             'transfers': {tr['from']: -tr['amount'],
-                           tr['to']: tr['amount']}
-             }
-        return cls(**d)
-
-
-class Transactions(ListPlus):
-    """ transactons class, extension of a list """
-    cls_factory = Transaction
-
-    def to_records(self):
-        for tr in self.data:
-            for rec in tr.to_records():
-                yield rec
-
-    def process(self):
-        """ return accounts and their balances """
-        tr = pd.DataFrame.from_records(self.to_records())
-        return tr.groupby(['account']).sum()['amount']
 
 
 class Invoice(UserDict):
@@ -404,3 +328,91 @@ class Invoices(ListPlus):
                          df.tax[df.tax < 0].sum()],
                         index=['tax.to_receive', 'tax.to_pay'])
         return pd.concat((acc, tax))
+
+
+class Transaction(UserDict):
+
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        keys = ['date', 'description', 'transfers']
+        vals = [None, None , None,  None]
+        for k, v in zip(keys, vals):
+            self.setdefault(k, v)
+
+        self.__fix_total()
+
+    def __getattr__(self, name):
+        if name in self.data:
+            return self.data[name]
+        else:
+            raise AttributeError(name)
+
+
+
+    def __fix_total(self):
+
+        total = 0
+        missing = None
+        for k, v in self.transfers.items():
+            if v is None:
+                if missing is None:
+                    missing = k
+                else:
+                    raise ValueError('More than one entry is missing')
+            else:
+                total += v
+
+        if missing:
+            self.transfers[missing] = -total
+
+    def to_records(self):
+        """ convert to simple account operations """
+        return  [ {'date':self.date, 'account':acct, 'amount':amount}  for acct,amount in self.transfers.items() ]
+
+    @classmethod
+    def from_dict(cls, d):
+        return cls(**d)
+
+    def to_yaml(self):
+        return yaml.dump(self.data, sort_keys=False)
+
+    @classmethod
+    def from_v1(cls, tr):
+        """ create from old (v1) dict type """
+
+        d = {'date': tr['date'],
+             'description': tr.get('description',None),
+             'transfers': {tr['from']: -tr['amount'],
+                           tr['to']: tr['amount']}
+             }
+        return cls(**d)
+
+
+class Transactions(ListPlus):
+    """ transactons class, extension of a list """
+    cls_factory = Transaction
+
+    def to_records(self):
+        for tr in self.data:
+            for rec in tr.to_records():
+                yield rec
+
+    def get_invoices(self) -> Invoices:
+        """ extract invoices from transactions """
+
+        invs = Invoices()
+
+        for t in self.data:
+            if 'invoice' in t.keys():
+                invs.append( Invoice(t['invoice']))
+
+        return invs
+
+    def process(self):
+        """ return accounts and their balances """
+        tr = pd.DataFrame.from_records(self.to_records())
+        return tr.groupby(['account']).sum()['amount']
+
+

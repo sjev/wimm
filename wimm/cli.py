@@ -28,7 +28,8 @@ def transactions():
 
 
 def invoices():
-    return core.load_data('invoices', PATH)
+    return core.load_data('transactions', PATH).get_invoices() 
+  
 
 
 def hasher():
