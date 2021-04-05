@@ -173,14 +173,28 @@ class ListPlus(UserList):
         #    return cls( [cls.cls_factory.from_dict(d) for d in data])
 
 
-@dataclass
-class Transaction:
-    date: str
-    description: str
-    transfers: dict
-    labels: str = None
+class Transaction(UserDict):
 
-    def __post_init__(self):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        keys = ['date', 'description', 'transfers']
+        vals = [None, None , None,  None]
+        for k, v in zip(keys, vals):
+            self.setdefault(k, v)
+
+        self.__fix_total()
+
+    def __getattr__(self, name):
+        if name in self.data:
+            return self.data[name]
+        else:
+            raise AttributeError(name)
+
+
+
+    def __fix_total(self):
 
         total = 0
         missing = None
@@ -204,15 +218,8 @@ class Transaction:
     def from_dict(cls, d):
         return cls(**d)
 
-    def to_dict(self, compact=False):
-        """ save to dict (dropping None values if `compact` is True) """
-        if compact:
-            return {k: v for k, v in asdict(self).items() if v is not None}
-        else:
-            return asdict(self)
-        
-    def to_yaml(self, compact=True):
-        return yaml.dump([self.to_dict(compact)], sort_keys=False)
+    def to_yaml(self):
+        return yaml.dump(self.data, sort_keys=False)
 
     @classmethod
     def from_v1(cls, tr):
