@@ -122,14 +122,12 @@ def init():
 
 @click.command('statement')
 @click.argument('bank')
-@click.option('--account', default=None, help='account name to fill in')
 @click.argument('data_file')
-def import_statement(bank, data_file, account):
+def import_statement(bank, data_file):
     """import bank statement to the end of `transactions.yaml`"""
 
-    import wimm.data_importers as importers
-
-    loaders = {'KNAB': importers.knab_import}
+    import wimm.importers.asn_bank as asn
+    loaders = {'ASN': asn.Importer}
 
     if bank not in loaders.keys():
         echo(
@@ -142,10 +140,9 @@ def import_statement(bank, data_file, account):
         echo('ERROR: file not found')
         return
 
-    if account is None:
-        trs = loaders[bank](data_file)
-    else:
-        trs = loaders[bank](data_file, account)
+    loader = loaders[bank](data_file)
+
+    trs = loader.transactions()
 
     with (PATH / structure.files['transactions']).open('a') as f:
         f.write(f'\n# ---IMPORT--- at {utils.timestamp()} file: {data_file}\n')
