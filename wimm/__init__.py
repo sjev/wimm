@@ -1,6 +1,5 @@
 from pathlib import Path
 import os
-import sys
 import yaml
 import wimm.structure as structure
 
@@ -8,9 +7,6 @@ import wimm.structure as structure
 __version__ = "DEV.0.0.9"
 
 DATE_FMT = "%Y-%m-%d"
-
-
-this = sys.modules[__name__]  # way to add module-wide variables
 
 
 def get_path():
