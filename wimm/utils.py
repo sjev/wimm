@@ -3,16 +3,14 @@
 """
 utility functions
 """
+import os
 import datetime as dt
-from yaml.loader import SafeLoader
+import re
+from dataclasses import asdict, is_dataclass
+from pathlib import Path
 import click
 import yaml
-import os
-import pandas as pd
-from pathlib import Path
-from dataclasses import asdict, is_dataclass
-import re
-
+from yaml.loader import SafeLoader
 from wimm import DATE_FMT
 import wimm
 
@@ -124,40 +122,6 @@ def df_to_yaml(df):
 
     d = df.to_dict(orient='records')
     return yaml.dump(d)
-
-
-def read_bank_statement(csv_file, bank='ASN'):
-    """
-    load bank statement csv file.
-    The transactions returned are relative to the bank account.
-
-    Parameters
-    ----------
-    csv_file : string
-        statement in csv format
-
-    Returns
-    -------
-    DataFrame
-
-    """
-
-    mappings = get_data_mappings()
-
-    if bank not in mappings.keys():
-        raise ValueError(f'No data mapping present for bank: {bank}')
-
-    header = mappings[bank]['header']
-    mapping = mappings[bank]['mapping']
-
-    df = pd.read_csv(csv_file, names=header)
-    df.rename(mapping, axis=1, inplace=True)
-
-    relevant_cols = [v for k, v in mapping.items()]
-
-    df = df[relevant_cols]
-
-    return df
 
 
 def md5(path):

@@ -74,54 +74,6 @@ def get_account(item):
     return account
 
 
-def parse_bank_statement(statement_file, acct_name='Assets.bank', bank='ASN'):
-    """
-    parse bank statement
-
-    Parameters
-    ----------
-    statement_file : string
-        csv or other file to parse
-    acct_name : string
-        account name to use (from/to name)
-    bank : string, optional
-        Type of statement. The default is 'ASN'.
-
-    Returns
-    -------
-    Transactions
-
-    """
-
-    df = utils.read_bank_statement(statement_file, bank)
-    records = df.to_dict(orient='records')
-
-    data = []
-
-    for r in records:
-
-        # init data element
-        d = {}
-        # TODO : remove nested data
-        if r['amount'] < 0:  # withdrawal
-            d['amount'] = -r['amount']
-            d['from'] = acct_name
-            d['to'] = {'account': 'Ext.Unknown',
-                       'name': r['name'], 'iban': r['iban_other']}
-        else:
-            d['amount'] = r['amount']
-            d['from'] = {'account': 'Ext.Unknown',
-                         'name': r['name'], 'iban': r['iban_other']}
-            d['to'] = acct_name
-
-        d['date'] = r['date']
-        d['description'] = r['description']
-
-        data.append(d)
-
-    return Transactions(data)
-
-
 def balance(transactions, start_balance=None, invoices=None, depth=None):
     """ calculate balance """
 
@@ -337,13 +289,13 @@ class Invoices(ListPlus):
 
         super().__init__(objects)
 
-    def get_by_id(self, id):
+    def get_by_id(self, invoice_id):
         """ get a invoice(s) by id
         id may be a partial string, with a wildcard *. Example INS*
         """
 
-        if id[-1] == '*':  # multiple matching
-            pat = id[:-1]
+        if invoice_id[-1] == '*':  # multiple matching
+            pat = invoice_id[:-1]
             n = len(pat)
             matches = []
             for inv in self.data:
@@ -353,7 +305,7 @@ class Invoices(ListPlus):
 
         else:
             for inv in self.data:  # single matching
-                if inv['id'] == id:
+                if inv['id'] == invoice_id:
                     return inv
 
         raise KeyError('id not found')

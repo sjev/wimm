@@ -97,25 +97,21 @@ def cli():
 @click.group()
 def show():
     """ print reports. Provide an command what to show """
-    pass
 
 
 @click.group()
 def add():
     """ add items to database """
-    pass
 
 
 @click.group()
 def convert():
     """ conversion utils """
-    pass
 
 
 @click.group('import')
 def import_data():
     """ import statements, documents etc. """
-    pass
 
 
 @click.command()
