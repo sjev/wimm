@@ -80,7 +80,7 @@ def info():
     """ show status """
     #echo(f'PATH: {PATH}')
     echo('Hashed files: %i' % len(hasher().hashes))
-    for k, v in wimm.settings.items():
+    for k, v in wimm.get_settings().items():
         if isinstance(v, dict):
             print(k)
             print(yaml.dump(v))
