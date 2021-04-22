@@ -8,10 +8,10 @@ Core classes and functions
 Entities & accounts
 --------------------
 
-The system is built upon the concept of  *accounts* and 
-*transactions*. 
+The system is built upon the concept of  *accounts* and
+*transactions*.
 
-An *account* is wehere the money goes to (or comes from) and 
+An *account* is wehere the money goes to (or comes from) and
 can be a person, company or a generic destination like for example 'expenses.'
 
 Subaccounts are used for grouping
@@ -20,7 +20,7 @@ and better organisation.
 The dot `.` sign is used to denote an entity and its (sub)accounts
 
 Example of an entity with a subaccount:
-    
+
 `Equity.bank.savings`
 
 
@@ -89,7 +89,7 @@ def parse_bank_statement(self, statement_file, acct_name='Assets.bank', bank='AS
 
     Returns
     -------
-    Transactions 
+    Transactions
 
     """
 
@@ -198,7 +198,7 @@ class Transaction:
 
     def to_records(self):
         """ convert to simple account operations """
-        return  [ {'date':self.date, 'account':acct, 'amount':amount}  for acct,amount in self.transfers.items() ]
+        return [{'date': self.date, 'account': acct, 'amount': amount} for acct, amount in self.transfers.items()]
 
     @classmethod
     def from_dict(cls, d):
@@ -210,7 +210,7 @@ class Transaction:
             return {k: v for k, v in asdict(self).items() if v is not None}
         else:
             return asdict(self)
-        
+
     def to_yaml(self, compact=True):
         return yaml.dump([self.to_dict(compact)], sort_keys=False)
 
@@ -219,7 +219,7 @@ class Transaction:
         """ create from old (v1) dict type """
 
         d = {'date': tr['date'],
-             'description': tr.get('description',None),
+             'description': tr.get('description', None),
              'transfers': {tr['from']: -tr['amount'],
                            tr['to']: tr['amount']}
              }
@@ -280,7 +280,7 @@ class Invoice(UserDict):
 
     def transaction(self):
         """ single transaction for an invoice """
-        
+
         # TODO: refactor. Ok, it's late and I don't have time to rewrite all the old code.
         # so  I'll just gently wrap it in a new function.
         trs = [Transaction.from_v1(tr) for tr in self._transactions()]
@@ -339,7 +339,7 @@ class Invoices(ListPlus):
         super().__init__(objects)
 
     def get_by_id(self, id):
-        """ get a invoice(s) by id 
+        """ get a invoice(s) by id
         id may be a partial string, with a wildcard *. Example INS*
         """
 

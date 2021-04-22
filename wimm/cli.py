@@ -34,41 +34,43 @@ def invoices():
 def hasher():
     return utils.Hasher(PATH / structure.files['hashes'])
 
+
 def initialize():
-    """ 
-    initialization function for data 
-    names are comma separated items
-    
     """
-   
-    
+    initialization function for data
+    names are comma separated items
+
+    """
+
     if click.confirm('Init files?'):
         # create files
         utils.save_yaml(PATH / structure.files['balance'], structure.accounts)
         utils.save_yaml(
             PATH / structure.files['transactions'], structure.transactions)
-        utils.save_yaml(PATH / structure.files['invoices'], structure.invoices()[:1])
-    
+        utils.save_yaml(
+            PATH / structure.files['invoices'], structure.invoices()[:1])
+
         # create folders
         for folder in structure.folders.values():
             p = PATH / folder
             if not p.exists():
                 p.mkdir()
-    
+
     if click.confirm('Init hash?'):
         echo('Rebuilding hashes')
         h = hasher()
         h.delete_hashes()
-    
+
         for key in ['INR', 'INS']:
             h.add(PATH / structure.folders[key])
 
     if click.confirm('Init settings?'):
-        
+
         settings = structure.settings
-        settings['company_name'] = click.prompt('Company name:', settings['company_name'])
-        
-        utils.save_yaml(PATH / structure.files['settings'], 
+        settings['company_name'] = click.prompt(
+            'Company name:', settings['company_name'])
+
+        utils.save_yaml(PATH / structure.files['settings'],
                         settings,
                         ask_confirmation=False)
 
@@ -79,7 +81,7 @@ def info():
     #echo(f'PATH: {PATH}')
     echo('Hashed files: %i' % len(hasher().hashes))
     for k, v in wimm.settings.items():
-        if isinstance(v,dict):
+        if isinstance(v, dict):
             print(k)
             print(yaml.dump(v))
         else:
@@ -103,10 +105,12 @@ def add():
     """ add items to database """
     pass
 
+
 @click.group()
 def convert():
     """ conversion utils """
     pass
+
 
 @click.group('import')
 def import_data():
@@ -128,7 +132,7 @@ def import_statement(bank, data_file, account):
     """import bank statement to the end of `transactions.yaml`"""
 
     import wimm.data_importers as importers
-    import wimm.structure as structure 
+    import wimm.structure as structure
 
     loaders = {'KNAB': importers.knab_import}
 
@@ -148,7 +152,6 @@ def import_statement(bank, data_file, account):
     else:
         transactions = loaders[bank](data_file, account)
 
-    
     with (PATH / structure.files['transactions']).open('a') as f:
         f.write(f'\n# ---IMPORT--- at {utils.timestamp()} file: {data_file}\n')
         f.write(transactions.to_yaml())
@@ -185,33 +188,32 @@ def show_invoices():
 
     for inv in invoices():
         print(inv)
-   
-    
-def add_invoice(prefix, src_file=None, no_hash = False):
+
+
+def add_invoice(prefix, src_file=None, no_hash=False):
     """ add a single invoice """
-    
-    
+
     if src_file is not None:
         assert src_file.exists(), 'File not found'
-    
+
     inv = core.Invoice()
 
     inv['amount'] = click.prompt('amount', type=float)
-    
+
     inv['id'] = click.prompt('id', invoices().get_next_id(prefix))
     inv['tax'] = click.prompt('tax', utils.tax(inv['amount']))
-    
+
     inv['ext_name'] = click.prompt('ext_company_name')
-    
+
     inv.set_accounts()
     inv['from'] = click.prompt('from acct', inv['from'])
     inv['to'] = click.prompt('to acct', inv['to'])
-    
+
     inv['description'] = click.prompt('description')
     inv['date'] = click.prompt('date', utils.date())
     inv['due_date'] = click.prompt(
         'due_date', utils.date_offset(inv['date'], 30))
-    
+
     if src_file is not None:
         dest_file = PATH / \
             structure.folders[prefix] / \
@@ -219,32 +221,31 @@ def add_invoice(prefix, src_file=None, no_hash = False):
         echo('copying file to:'+str(dest_file))
         shutil.copy(src_file, dest_file)
         inv['attachment'] = dest_file.relative_to(PATH).as_posix()
-        
-        if not no_hash: 
+
+        if not no_hash:
             hsh = hasher()
             hsh.add(dest_file)
 
-    
     invoices_new = core.Invoices()
     invoices_new.append(inv)
-    
+
     with open(PATH / structure.files['invoices'], 'a') as f:
         f.write(invoices_new.to_yaml())
-        
+
     with (PATH / structure.files['transactions']).open('a') as f:
         f.write(inv.transaction().to_yaml())
-    
+
 
 @click.command('invoice')
 @click.argument('prefix')
-@click.option('--pattern','-p', default=None, help = 'Filename or a search pattern, like *.pdf' )
-@click.option("--no_hash", is_flag=True, help = "Do not check if file is already in database")
+@click.option('--pattern', '-p', default=None, help='Filename or a search pattern, like *.pdf')
+@click.option("--no_hash", is_flag=True, help="Do not check if file is already in database")
 def add_invoices(prefix, pattern, no_hash):
-    """ add invoice(s).  
-    
+    """ add invoice(s).
+
     \b
     PREFIX invoice prefix, 3 characters (INR,INS etc.)
-    
+
     """
     import subprocess
     import sys
@@ -252,7 +253,7 @@ def add_invoices(prefix, pattern, no_hash):
     if pattern is None:
         add_invoice(prefix)
         return
-        
+
     else:
         if pattern[0] == '*':
             files = [p.absolute() for p in Path('.').glob(pattern)]
@@ -264,33 +265,34 @@ def add_invoices(prefix, pattern, no_hash):
 
     for src_file in files:
         try:
-            assert src_file.exists(), 'File not found'    
-            
+            assert src_file.exists(), 'File not found'
+
             if not no_hash:
                 hsh = hasher()
-                assert hsh.is_present(src_file) == False, f'{src_file} is already in database.'
-            
+                assert hsh.is_present(
+                    src_file) == False, f'{src_file} is already in database.'
+
             devnull = open(os.devnull, 'w')
             opener = "open" if sys.platform == "darwin" else "xdg-open"
             subprocess.call([opener, src_file.as_posix()],
                             stdout=devnull, stderr=devnull)
 
-            add_invoice(prefix,src_file,no_hash)
-            
-            
+            add_invoice(prefix, src_file, no_hash)
+
         except AssertionError as e:
             echo(e)
 
 
-
 @click.command('transactions')
 def convert_transactions():
-    
+
     if click.confirm('Transactions file will be overwritten. Sure?'):
         fname = PATH / structure.files['transactions']
         data_v1 = yaml.load(fname.open(), Loader=yaml.SafeLoader)
-        trs = core.Transactions([wimm.core.Transaction.from_v1(d).to_dict() for d in data_v1])
+        trs = core.Transactions(
+            [wimm.core.Transaction.from_v1(d).to_dict() for d in data_v1])
         trs.to_yaml(fname)
+
 
 # build groups
 import_data.add_command(import_statement)
@@ -310,7 +312,6 @@ cli.add_command(show)
 cli.add_command(info)
 cli.add_command(add)
 cli.add_command(convert)
-
 
 
 if __name__ == "__main__":  # note - name will be wimm.cli in case of terminal cmd
