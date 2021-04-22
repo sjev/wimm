@@ -162,7 +162,7 @@ def show_balance(depth, nozeros):
         balance = balance[balance != 0]
 
     print('----------Balance-----------')
-    print(balance.to_string(float_format=utils.human_format))
+    print(balance.to_string(float_format='%.2f'))
     print('----------------------------')
     print(f'SUM: {balance.sum():.2f}')
 
