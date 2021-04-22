@@ -96,10 +96,11 @@ def balance(transactions, start_balance=None, invoices=None, depth=None):
 
 class ListPlus(UserList):
     """ base extensions for a list """
-    cls_factory = None  # replace this by a class to create items
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self,  *args, cls_factory=None, **kwargs):
         super().__init__(*args, **kwargs)
+
+        self.cls_factory = cls_factory
         if self.cls_factory is not None:
             self.data = [self.cls_factory(**d) for d in self.data]
 
@@ -196,7 +197,9 @@ class Transaction(UserDict):
 
 class Transactions(ListPlus):
     """ transactons class, extension of a list """
-    cls_factory = Transaction
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, cls_factory=Transaction, **kwargs)
 
     def to_records(self):
         for tr in self.data:
