@@ -34,6 +34,7 @@ A tranaction may be taxed (with a VAT for example)
 
 """
 from collections import UserList, UserDict
+from typing import Tuple
 import yaml
 import wimm.utils as utils
 import pandas as pd
@@ -208,8 +209,20 @@ class Transactions(ListPlus):
 
     def process(self):
         """ return accounts and their balances """
-        tr = pd.DataFrame.from_records(self.to_records())
-        return tr.groupby(['account']).sum()['amount']
+        return self.to_df().groupby(['account']).sum()['amount']
+
+    def to_df(self, date_range: Tuple = None) -> pd.DataFrame:
+        """ transactions as DataFrame """
+
+        df = pd.DataFrame.from_records(self.to_records())
+        df['date'] = pd.to_datetime(df['date'])
+
+        if date_range is None:
+            return df
+
+        # select dates
+        mask = (df.date >= date_range[0]) & (df.date < date_range[1])
+        return df[mask]
 
 
 class Invoice(UserDict):
