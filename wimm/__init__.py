@@ -1,7 +1,11 @@
 from pathlib import Path
 import os
 import sys
-__version__ = "DEV.0.0.8"
+import yaml
+import wimm.structure as structure
+
+
+__version__ = "DEV.0.0.9"
 
 DATE_FMT = "%Y-%m-%d"
 
@@ -19,25 +23,18 @@ def get_path():
     return Path(val)
 
 
-this.settings = {'path': get_path()}
-
-
 def get_settings():
     """ get settings from file or defaults """
 
-    import wimm.structure as structure
-    path = this.settings['path']
+    path = get_path()
 
     if path is None:
         return structure.settings
 
     p = path / structure.files['settings']
-    if p.exists():
-        import yaml
-        settings = yaml.load(p.open(), Loader=yaml.SafeLoader)
-        return settings
-    else:
-        return structure.settings
+    assert p.exists(), f'no settings file in {p.as_posix()}'
 
+    settings = yaml.load(p.open(), Loader=yaml.SafeLoader)
+    settings['path'] = path
 
-this.settings = {**this.settings, **get_settings()}
+    return settings

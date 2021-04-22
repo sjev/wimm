@@ -310,6 +310,6 @@ if __name__ == "__main__":  # note - name will be wimm.cli in case of terminal c
 
     PATH = list(Path(__file__).parents)[1] / 'tests/data'
 else:
-    PATH = wimm.settings['path']
+    PATH = wimm.get_settings()['path']
     if not PATH:
         echo("WARNING: environment variable WIMM_PATH is not set")
