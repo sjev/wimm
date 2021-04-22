@@ -7,6 +7,7 @@ import pandas as pd
 from wimm.importers import abstract_classes
 from wimm.core import Transactions
 from wimm.utils import clean_str
+import wimm
 
 mapping = {'header': ['Boekingsdatum',
                       'Opdrachtgeversrekening',
@@ -42,7 +43,7 @@ class Importer(abstract_classes.Importer):
         header = mapping['header']
         renaming = mapping['mapping']
 
-        df = pd.read_csv(csv_file, names=header)
+        df = pd.read_csv(csv_file, names=header, parse_dates=['Boekingsdatum'])
         df.rename(renaming, axis=1, inplace=True)
 
         relevant_cols = [v for k, v in renaming.items()]
@@ -58,7 +59,7 @@ class Importer(abstract_classes.Importer):
 
             # init data element
             d = {}
-            d['date'] = r['date']
+            d['date'] = r['date'].strftime(wimm.DATE_FMT)
             d['description'] = r['description'].strip("'")
 
             try:
