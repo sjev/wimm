@@ -6,17 +6,17 @@ main cli application
 @author: jev
 """
 
-import wimm  # app version is defined in __init__.py
-import wimm.utils as utils
-import wimm.core as core
-import wimm.structure as structure
-
 import os
 import shutil
 from pathlib import Path
 import click
 from click import echo
 import yaml
+
+import wimm  # app version is defined in __init__.py
+import wimm.utils as utils
+import wimm.core as core
+import wimm.structure as structure
 
 
 def start_balance():
@@ -132,7 +132,6 @@ def import_statement(bank, data_file, account):
     """import bank statement to the end of `transactions.yaml`"""
 
     import wimm.data_importers as importers
-    import wimm.structure as structure
 
     loaders = {'KNAB': importers.knab_import}
 
@@ -148,13 +147,13 @@ def import_statement(bank, data_file, account):
         return
 
     if account is None:
-        transactions = loaders[bank](data_file)
+        trs = loaders[bank](data_file)
     else:
-        transactions = loaders[bank](data_file, account)
+        trs = loaders[bank](data_file, account)
 
     with (PATH / structure.files['transactions']).open('a') as f:
         f.write(f'\n# ---IMPORT--- at {utils.timestamp()} file: {data_file}\n')
-        f.write(transactions.to_yaml())
+        f.write(trs.to_yaml())
 
 
 @click.command('balance')

@@ -74,7 +74,7 @@ def get_account(item):
     return account
 
 
-def parse_bank_statement(self, statement_file, acct_name='Assets.bank', bank='ASN'):
+def parse_bank_statement(statement_file, acct_name='Assets.bank', bank='ASN'):
     """
     parse bank statement
 
@@ -178,7 +178,6 @@ class Transaction:
     date: str
     description: str
     transfers: dict
-    labels: str = None
 
     def __post_init__(self):
 

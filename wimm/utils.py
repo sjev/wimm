@@ -17,6 +17,11 @@ from wimm import DATE_FMT
 import wimm
 
 
+def clean_str(s):
+    """ replace unwanted characters"""
+    return s.replace(" ", "_").replace(".", "").strip()
+
+
 def tax(amount, rate=0.21):
     return round(amount-amount/(1+rate), 2)
 
@@ -71,11 +76,12 @@ def timestamp(fmt=DATE_FMT+"_%H%M", offset_days=0):
 def date(offset=0):
     return timestamp(DATE_FMT, offset)
 
+
 def date_offset(date_string, offset_days):
     """ offset a date by a number of days """
-    
-    return  (dt.datetime.strptime(date_string, DATE_FMT) \
-             + dt.timedelta(days=offset_days)).strftime(DATE_FMT)
+
+    return (dt.datetime.strptime(date_string, DATE_FMT)
+            + dt.timedelta(days=offset_days)).strftime(DATE_FMT)
 
 
 def save_yaml(yaml_file, data, ask_confirmation=True):
@@ -86,7 +92,7 @@ def save_yaml(yaml_file, data, ask_confirmation=True):
         if not overwrite:
             return
 
-    try: 
+    try:
         data.to_yaml(yaml_file)
     except AttributeError:
         with open(yaml_file, 'w') as f:
@@ -181,7 +187,7 @@ def md5(path):
 
 
 class Hasher:
-    """ class to manage file hashes 
+    """ class to manage file hashes
     hashes are stored as  hash per line
 
     """
@@ -193,32 +199,32 @@ class Hasher:
         if self.data_file.exists():
             with self.data_file.open('r') as fid:
                 lines = fid.readlines()
-            
-            
+
             self.hashes = [l.strip() for l in lines]
         else:
             self.hashes = []
-            
+
     def add(self, path):
         """ add hashes of a file or path """
-        
+
         hashes = md5(path)
         with self.data_file.open('a') as f:
             for l in hashes:
                 f.write(l+'\n')
 
     def delete_hashes(self):
-       """ clear all hashes """
-       self.hashes = []
-       if self.data_file.exists():
-           self.data_file.unlink()
-       
-    def is_present(self,path):
+        """ clear all hashes """
+        self.hashes = []
+        if self.data_file.exists():
+            self.data_file.unlink()
+
+    def is_present(self, path):
         """ check if a file is present in hashes """
         hsh = md5(path)[0]
         return hsh in self.hashes
-    
-def names_to_labels(names, depth = 1, sep='.'):
+
+
+def names_to_labels(names, depth=1, sep='.'):
     """
     convert names to grouping labels
 
@@ -239,29 +245,32 @@ def names_to_labels(names, depth = 1, sep='.'):
     """
     labels = []
     for name in names:
-        fields  = name.split(sep)
-        labels.append('.'.join(fields[:depth]) if len(fields) >= depth else name)
+        fields = name.split(sep)
+        labels.append('.'.join(fields[:depth])
+                      if len(fields) >= depth else name)
     return labels
 
+
 def invoice_accounts(prefix, params, key='invoice_accounts'):
-    """ 
-    helper for invoice accounts. 
-    
+    """
+    helper for invoice accounts.
+
     Returns: {'from': acct, 'to': acct }
     """
-    
+
     accs = wimm.settings[key]
-    
+
     if prefix not in accs:
-        return {'from':'Uncategorized', 'to':'Uncategorized'}
-    
+        return {'from': 'Uncategorized', 'to': 'Uncategorized'}
+
     params.setdefault('company_name', wimm.settings['company_name'])
-    
+
     out = {}
-    for k,v in accs[prefix].items():
+    for k, v in accs[prefix].items():
         out[k] = v.format(**params)
-        
+
     return out
+
 
 def human_format(num):
     num = float('{:.3g}'.format(num))
