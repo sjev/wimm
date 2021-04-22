@@ -326,12 +326,12 @@ class Invoices(ListPlus):
         """ get next available invoice number for a prefix """
 
         try:
-            id = self.get_by_id(prefix+'*')[-1]['id']
+            invoice_id = self.get_by_id(prefix+'*')[-1]['id']
         except IndexError:  # prefix not found, make new one
             return f"{prefix}{utils.timestamp('%y')}_001"
 
-        nr = int(id[-3:]) + 1
-        return id[:-3] + '%03d' % nr
+        nr = int(invoice_id[-3:]) + 1
+        return invoice_id[:-3] + '%03d' % nr
 
     def get_sorted_by(self, key, reverse=False):
 
