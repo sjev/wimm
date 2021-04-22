@@ -298,16 +298,8 @@ class Invoice(UserDict):
 
 class Invoices(ListPlus):
 
-    def __init__(self, lst=[]):
-
-        objects = []
-        for d in lst:
-            if isinstance(d, Invoice):
-                objects.append(d)
-            else:
-                objects.append(Invoice(**d))
-
-        super().__init__(objects)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, cls_factory=Invoice, **kwargs)
 
     def get_by_id(self, invoice_id):
         """ get a invoice(s) by id
